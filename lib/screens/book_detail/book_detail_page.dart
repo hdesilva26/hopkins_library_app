@@ -53,8 +53,8 @@ class BookDetailPage extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        const Icon(Icons.star,
-                            size: 18, color: Colors.amber),
+                        Icon(Icons.star,
+                            size: 18, color: Colors.grey.shade700),
                         const SizedBox(width: 4),
                         Text(
                           '${book.rating.toStringAsFixed(1)} (${book.ratingCount})',
@@ -97,15 +97,15 @@ class BookDetailPage extends StatelessWidget {
                   if (book.isCommitteePick)
                     Chip(
                       label: const Text('Committee Pick'),
-                      avatar: const Icon(Icons.star, size: 18),
-                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                      avatar: Icon(Icons.star, size: 18, color: Colors.grey.shade700),
+                      backgroundColor: Colors.grey.shade100,
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
                   if (book.isRequired)
                     Chip(
                       label: const Text('Required Reading'),
-                      avatar: const Icon(Icons.assignment, size: 18),
-                      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                      avatar: Icon(Icons.assignment, size: 18, color: Colors.grey.shade700),
+                      backgroundColor: Colors.grey.shade100,
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
                 ],
@@ -172,10 +172,10 @@ class _ShelfButton extends StatelessWidget {
             PopupMenuItem(
               value: null,
               child: Row(
-                children: const [
-                  Icon(Icons.remove_circle_outline, size: 20, color: Colors.red),
-                  SizedBox(width: 12),
-                  Text('Remove from shelf', style: TextStyle(color: Colors.red)),
+                children: [
+                  Icon(Icons.remove_circle_outline, size: 20, color: Colors.grey.shade700),
+                  const SizedBox(width: 12),
+                  Text('Remove from shelf', style: TextStyle(color: Colors.grey.shade700)),
                 ],
               ),
             ),

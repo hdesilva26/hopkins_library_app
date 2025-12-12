@@ -78,20 +78,20 @@ class _SignInScreenState extends State<SignInScreen> {
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.red.shade50,
+                    color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.red.shade200),
+                    border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                      Icon(Icons.error_outline, color: Colors.grey.shade700, size: 20),
                       const SizedBox(width: 8),
                       Flexible(
                         child: Text(
                           _error!,
                           style: TextStyle(
-                            color: Colors.red.shade700,
+                            color: Colors.grey.shade700,
                             fontSize: 14,
                           ),
                           textAlign: TextAlign.center,

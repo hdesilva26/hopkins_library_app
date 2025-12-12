@@ -27,12 +27,8 @@ class BookCoverImage extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        gradient: LinearGradient(
-          colors: [
-            Colors.deepPurple.shade300,
-            Colors.indigo.shade400,
-          ],
-        ),
+        color: Colors.grey.shade200,
+        border: Border.all(color: Colors.grey.shade300, width: 1),
       ),
       child: coverUrl != null
           ? ClipRRect(
@@ -45,15 +41,10 @@ class BookCoverImage extends StatelessWidget {
                 placeholder: (context, url) => Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.deepPurple.shade200,
-                        Colors.indigo.shade300,
-                      ],
-                    ),
+                    color: Colors.grey.shade200,
                   ),
                   child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black54),
                   ),
                 ),
                 errorWidget: (context, url, error) => _buildPlaceholder(),
@@ -69,18 +60,14 @@ class BookCoverImage extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        gradient: LinearGradient(
-          colors: [
-            Colors.deepPurple.shade300,
-            Colors.indigo.shade400,
-          ],
-        ),
+        color: Colors.grey.shade200,
+        border: Border.all(color: Colors.grey.shade300, width: 1),
       ),
       child: Center(
         child: Text(
           book.title.isNotEmpty ? book.title[0].toUpperCase() : '?',
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Colors.grey.shade700,
             fontSize: 36,
             fontWeight: FontWeight.bold,
           ),

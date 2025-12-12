@@ -100,7 +100,7 @@ class _ExplorePageState extends State<ExplorePage> {
                 ),
                 SliverToBoxAdapter(
                   child: SizedBox(
-                    height: 220,
+                    height: 230,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -120,7 +120,7 @@ class _ExplorePageState extends State<ExplorePage> {
                 ),
                 SliverToBoxAdapter(
                   child: SizedBox(
-                    height: 200,
+                    height: 210,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -140,7 +140,7 @@ class _ExplorePageState extends State<ExplorePage> {
                 ),
                 SliverToBoxAdapter(
                   child: SizedBox(
-                    height: 200,
+                    height: 210,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 12),

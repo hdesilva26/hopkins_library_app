@@ -40,7 +40,7 @@ class BookListTile extends StatelessWidget {
             Text(book.author),
             Row(
               children: [
-                const Icon(Icons.star, size: 14, color: Colors.amber),
+                Icon(Icons.star, size: 14, color: Colors.grey.shade700),
                 const SizedBox(width: 2),
                 Text(
                   '${book.rating.toStringAsFixed(1)} • ${book.genre}',
@@ -116,10 +116,10 @@ class _ShelfMenu extends StatelessWidget {
         PopupMenuItem(
           value: null,
           child: Row(
-            children: const [
-              Icon(Icons.remove_circle_outline, size: 20, color: Colors.red),
-              SizedBox(width: 12),
-              Text('Remove', style: TextStyle(color: Colors.red)),
+            children: [
+              Icon(Icons.remove_circle_outline, size: 20, color: Colors.grey.shade700),
+              const SizedBox(width: 12),
+              Text('Remove', style: TextStyle(color: Colors.grey.shade700)),
             ],
           ),
         ),

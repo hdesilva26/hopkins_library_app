@@ -69,6 +69,7 @@ class _BookCardState extends State<BookCard>
           width: width,
           margin: const EdgeInsets.symmetric(horizontal: 8),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Hero(
@@ -83,45 +84,58 @@ class _BookCardState extends State<BookCard>
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                widget.book.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  height: 1.3,
+              const SizedBox(height: 6),
+              SizedBox(
+                width: width,
+                child: Text(
+                  widget.book.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    height: 1.15,
+                  ),
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
-                widget.book.author,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade700,
+              SizedBox(
+                width: width,
+                child: Text(
+                  widget.book.author,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade700,
+                  ),
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 3),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.star, size: 14, color: Colors.amber),
+                  Icon(Icons.star, size: 14, color: Colors.grey.shade700),
                   const SizedBox(width: 2),
-                  Text(
-                    widget.book.rating.toStringAsFixed(1),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                  Flexible(
+                    child: Text(
+                      widget.book.rating.toStringAsFixed(1),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   const SizedBox(width: 4),
-                  Text(
-                    '(${widget.book.ratingCount})',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey.shade600,
+                  Flexible(
+                    child: Text(
+                      '(${widget.book.ratingCount})',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
