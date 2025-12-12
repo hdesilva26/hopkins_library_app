@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../models/book.dart';
 import '../../models/app_state.dart';
@@ -24,11 +25,14 @@ class BookDetailPage extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BookCoverImage(
-                book: book,
-                width: 90,
-                height: 130,
-                size: 'L',
+              Hero(
+                tag: 'book_cover_${book.id}',
+                child: BookCoverImage(
+                  book: book,
+                  width: 90,
+                  height: 130,
+                  size: 'L',
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -64,45 +68,9 @@ class BookDetailPage extends StatelessWidget {
                           TextStyle(fontSize: 13, color: Colors.grey.shade700),
                     ),
                     const SizedBox(height: 12),
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        final newStatus =
-                            await showMenu<ShelfStatus?>(
-                          context: context,
-                          position:
-                              const RelativeRect.fromLTRB(0, 0, 0, 0),
-                          items: const [
-                            PopupMenuItem(
-                              value: ShelfStatus.wantToRead,
-                              child: Text('Want to Read'),
-                            ),
-                            PopupMenuItem(
-                              value: ShelfStatus.reading,
-                              child: Text('Reading'),
-                            ),
-                            PopupMenuItem(
-                              value: ShelfStatus.finished,
-                              child: Text('Finished'),
-                            ),
-                            PopupMenuDivider(),
-                            PopupMenuItem(
-                              value: null,
-                              child: Text('Remove from shelf'),
-                            ),
-                          ],
-                        );
-
-                        if (newStatus != null ||
-                            (newStatus == null && status != null)) {
-                          context
-                              .read<AppState>()
-                              .setStatus(book, newStatus);
-                        }
-                      },
-                      icon: Icon(
-                        status == null ? Icons.add : Icons.check,
-                      ),
-                      label: Text(status?.label ?? 'Add to shelf'),
+                    _ShelfButton(
+                      book: book,
+                      currentStatus: status,
                     ),
                   ],
                 ),
@@ -123,22 +91,119 @@ class BookDetailPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 16),
               child: Wrap(
-                spacing: 8,
+                spacing: 12,
+                runSpacing: 8,
                 children: [
                   if (book.isCommitteePick)
-                    const Chip(
-                      label: Text('Committee Pick'),
-                      avatar: Icon(Icons.star, size: 16),
+                    Chip(
+                      label: const Text('Committee Pick'),
+                      avatar: const Icon(Icons.star, size: 18),
+                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
                   if (book.isRequired)
-                    const Chip(
-                      label: Text('Required Reading'),
-                      avatar: Icon(Icons.assignment, size: 16),
+                    Chip(
+                      label: const Text('Required Reading'),
+                      avatar: const Icon(Icons.assignment, size: 18),
+                      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
                 ],
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _ShelfButton extends StatelessWidget {
+  final Book book;
+  final ShelfStatus? currentStatus;
+
+  const _ShelfButton({
+    required this.book,
+    required this.currentStatus,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: () async {
+        HapticFeedback.lightImpact();
+        final newStatus = await showMenu<ShelfStatus?>(
+          context: context,
+          position: const RelativeRect.fromLTRB(0, 0, 0, 0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          items: [
+            PopupMenuItem(
+              value: ShelfStatus.wantToRead,
+              child: Row(
+                children: const [
+                  Icon(Icons.bookmark_border, size: 20),
+                  SizedBox(width: 12),
+                  Text('Want to Read'),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: ShelfStatus.reading,
+              child: Row(
+                children: const [
+                  Icon(Icons.menu_book, size: 20),
+                  SizedBox(width: 12),
+                  Text('Reading'),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: ShelfStatus.finished,
+              child: Row(
+                children: const [
+                  Icon(Icons.check_circle_outline, size: 20),
+                  SizedBox(width: 12),
+                  Text('Finished'),
+                ],
+              ),
+            ),
+            const PopupMenuDivider(),
+            PopupMenuItem(
+              value: null,
+              child: Row(
+                children: const [
+                  Icon(Icons.remove_circle_outline, size: 20, color: Colors.red),
+                  SizedBox(width: 12),
+                  Text('Remove from shelf', style: TextStyle(color: Colors.red)),
+                ],
+              ),
+            ),
+          ],
+        );
+
+        if (newStatus != null || (newStatus == null && currentStatus != null)) {
+          HapticFeedback.mediumImpact();
+          context.read<AppState>().setStatus(book, newStatus);
+        }
+      },
+      icon: Icon(
+        currentStatus == null
+            ? Icons.add
+            : currentStatus == ShelfStatus.wantToRead
+                ? Icons.bookmark
+                : currentStatus == ShelfStatus.reading
+                    ? Icons.menu_book
+                    : Icons.check_circle,
+      ),
+      label: Text(currentStatus?.label ?? 'Add to shelf'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: currentStatus != null
+            ? Theme.of(context).colorScheme.primaryContainer
+            : null,
+        foregroundColor: currentStatus != null
+            ? Theme.of(context).colorScheme.onPrimaryContainer
+            : null,
       ),
     );
   }

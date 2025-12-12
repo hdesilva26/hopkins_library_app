@@ -38,6 +38,8 @@ class _HomeScreenState extends State<HomeScreen> {
         onDestinationSelected: (index) {
           setState(() => _selectedIndex = index);
         },
+        elevation: 4,
+        height: 70,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.explore_outlined),

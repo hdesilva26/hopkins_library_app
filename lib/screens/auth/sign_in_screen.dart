@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_state.dart';
 
@@ -14,6 +15,7 @@ class _SignInScreenState extends State<SignInScreen> {
   String? _error;
 
   Future<void> _handleSignIn() async {
+    HapticFeedback.mediumImpact();
     setState(() {
       _loading = true;
       _error = null;
@@ -22,6 +24,7 @@ class _SignInScreenState extends State<SignInScreen> {
     try {
       await context.read<AuthState>().signInWithGoogle();
     } catch (e) {
+      HapticFeedback.heavyImpact();
       setState(() {
         _error = e.toString().replaceAll('Exception: ', '');
       });
@@ -41,34 +44,77 @@ class _SignInScreenState extends State<SignInScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.menu_book_rounded,
-                  size: 72, color: colorScheme.primary),
-              const SizedBox(height: 16),
-              const Text(
-                'Hopkins Reads',
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Sign in with your Hopkins Google account to track your summer reading.',
-                textAlign: TextAlign.center,
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer.withOpacity(0.3),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.menu_book_rounded,
+                  size: 64,
+                  color: colorScheme.primary,
+                ),
               ),
               const SizedBox(height: 24),
+              Text(
+                'Hopkins Reads',
+                style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Sign in with your Hopkins Google account to track your summer reading.',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurface.withOpacity(0.7),
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
               if (_error != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    _error!,
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.red.shade200),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          _error!,
+                          style: TextStyle(
+                            color: Colors.red.shade700,
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               SizedBox(
-                width: 260,
+                width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: _loading ? null : _handleSignIn,
-                  icon: const Icon(Icons.login),
+                  icon: _loading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.login),
                   label: Text(_loading ? 'Signing in…' : 'Sign in with Hopkins'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
                 ),
               ),
             ],

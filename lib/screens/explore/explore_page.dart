@@ -41,8 +41,13 @@ class _ExplorePageState extends State<ExplorePage> {
         final recs = state.recommendations();
 
         return SafeArea(
-          child: CustomScrollView(
-            slivers: [
+          child: RefreshIndicator(
+            onRefresh: () async {
+              // Simulate refresh delay
+              await Future.delayed(const Duration(milliseconds: 500));
+            },
+            child: CustomScrollView(
+              slivers: [
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -163,6 +168,7 @@ class _ExplorePageState extends State<ExplorePage> {
                 ),
               ],
             ],
+            ),
           ),
         );
       },

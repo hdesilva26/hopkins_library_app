@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/book.dart';
 
 class BookCoverImage extends StatelessWidget {
@@ -36,25 +37,28 @@ class BookCoverImage extends StatelessWidget {
       child: coverUrl != null
           ? ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                coverUrl,
+              child: CachedNetworkImage(
+                imageUrl: coverUrl,
                 width: width,
                 height: height,
                 fit: fit,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
+                placeholder: (context, url) => Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.deepPurple.shade200,
+                        Colors.indigo.shade300,
+                      ],
                     ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return _buildPlaceholder();
-                },
+                  ),
+                  child: const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+                errorWidget: (context, url, error) => _buildPlaceholder(),
+                fadeInDuration: const Duration(milliseconds: 300),
+                fadeOutDuration: const Duration(milliseconds: 100),
               ),
             )
           : _buildPlaceholder(),

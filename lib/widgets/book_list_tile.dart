@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../models/book.dart';
 import '../models/app_state.dart';
@@ -16,7 +17,8 @@ class BookListTile extends StatelessWidget {
     final status = state.statusFor(book);
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      elevation: 1,
       child: ListTile(
         onTap: () {
           Navigator.of(context).push(
@@ -72,26 +74,54 @@ class _ShelfMenu extends StatelessWidget {
 
     return PopupMenuButton<ShelfStatus?>(
       initialValue: status,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       onSelected: (value) {
+        HapticFeedback.lightImpact();
         context.read<AppState>().setStatus(book, value);
       },
-      itemBuilder: (context) => const [
+      itemBuilder: (context) => [
         PopupMenuItem(
           value: ShelfStatus.wantToRead,
-          child: Text('Want to Read'),
+          child: Row(
+            children: const [
+              Icon(Icons.bookmark_border, size: 20),
+              SizedBox(width: 12),
+              Text('Want to Read'),
+            ],
+          ),
         ),
         PopupMenuItem(
           value: ShelfStatus.reading,
-          child: Text('Reading'),
+          child: Row(
+            children: const [
+              Icon(Icons.menu_book, size: 20),
+              SizedBox(width: 12),
+              Text('Reading'),
+            ],
+          ),
         ),
         PopupMenuItem(
           value: ShelfStatus.finished,
-          child: Text('Finished'),
+          child: Row(
+            children: const [
+              Icon(Icons.check_circle_outline, size: 20),
+              SizedBox(width: 12),
+              Text('Finished'),
+            ],
+          ),
         ),
-        PopupMenuDivider(),
+        const PopupMenuDivider(),
         PopupMenuItem(
           value: null,
-          child: Text('Remove'),
+          child: Row(
+            children: const [
+              Icon(Icons.remove_circle_outline, size: 20, color: Colors.red),
+              SizedBox(width: 12),
+              Text('Remove', style: TextStyle(color: Colors.red)),
+            ],
+          ),
         ),
       ],
       child: Icon(

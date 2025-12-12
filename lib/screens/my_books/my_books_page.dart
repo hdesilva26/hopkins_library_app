@@ -39,6 +39,82 @@ class MyBooksPage extends StatelessWidget {
   }
 }
 
+class _EmptyShelfState extends StatelessWidget {
+  final ShelfStatus type;
+
+  const _EmptyShelfState({required this.type});
+
+  String get _message {
+    switch (type) {
+      case ShelfStatus.wantToRead:
+        return 'Start building your reading list';
+      case ShelfStatus.reading:
+        return 'No books in progress';
+      case ShelfStatus.finished:
+        return 'Your completed books will appear here';
+    }
+  }
+
+  String get _subtitle {
+    switch (type) {
+      case ShelfStatus.wantToRead:
+        return 'Explore books and add them to your list';
+      case ShelfStatus.reading:
+        return 'Mark a book as "Reading" to track your progress';
+      case ShelfStatus.finished:
+        return 'Mark books as "Finished" when you complete them';
+    }
+  }
+
+  IconData get _icon {
+    switch (type) {
+      case ShelfStatus.wantToRead:
+        return Icons.bookmark_border;
+      case ShelfStatus.reading:
+        return Icons.menu_book_outlined;
+      case ShelfStatus.finished:
+        return Icons.check_circle_outline;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              _icon,
+              size: 64,
+              color: colorScheme.primary.withOpacity(0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _message,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.87),
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _subtitle,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.6),
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ShelfListContainer extends StatelessWidget {
   final ShelfStatus type;
 
@@ -62,12 +138,19 @@ class _ShelfListContainer extends StatelessWidget {
     }
 
     if (books.isEmpty) {
-      return const Center(child: Text('No books here yet.'));
+      return _EmptyShelfState(type: type);
     }
 
-    return ListView.builder(
-      itemCount: books.length,
-      itemBuilder: (context, index) => BookListTile(book: books[index]),
+    return RefreshIndicator(
+      onRefresh: () async {
+        // Simulate refresh delay for better UX
+        await Future.delayed(const Duration(milliseconds: 500));
+      },
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        itemCount: books.length,
+        itemBuilder: (context, index) => BookListTile(book: books[index]),
+      ),
     );
   }
 }
