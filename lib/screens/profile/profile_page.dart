@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../services/auth_state.dart';
 import '../../models/app_state.dart';
 import '../../widgets/common_widgets.dart';
+import '../admin/admin_panel_page.dart';
 
 /// User profile page displaying account info and reading statistics
 /// Shows: User avatar, name, email, reading stats, and sign-out button
@@ -74,6 +75,29 @@ class ProfilePage extends StatelessWidget {
           StatRow(label: 'Want to Read', value: state.wantToReadBooks.length.toString()),
 
           const Spacer(),
+          
+          // Admin panel button (only shown for admins)
+          if (auth.isAdmin)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Center(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const AdminPanelPage(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.admin_panel_settings),
+                  label: const Text('Admin Panel'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.purple,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+            ),
           
           Center(
             child: ElevatedButton.icon(

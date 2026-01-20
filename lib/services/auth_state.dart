@@ -2,11 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'user_service.dart';
 
 /// Authentication state management
 /// Handles Google Sign-In with domain restriction to Hopkins.edu accounts
+/// Manages user roles (student/admin)
 class AuthState extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final UserService _userService = UserService();
 
   // Single GoogleSignIn instance to avoid logout bugs
   // Configured with email scope for user identification
@@ -16,21 +19,52 @@ class AuthState extends ChangeNotifier {
 
   User? _user;
   bool _initializing = true;
+  String _userRole = UserService.roleStudent;
+  bool _roleLoaded = false;
 
   AuthState() {
     // Check if user is already signed in
     _user = _auth.currentUser;
+    if (_user != null) {
+      _loadUserRole();
+    }
     // Listen for authentication state changes (sign in/out)
     _auth.authStateChanges().listen((user) {
       _user = user;
+      if (user != null) {
+        _loadUserRole();
+      } else {
+        _userRole = UserService.roleStudent;
+        _roleLoaded = false;
+      }
       _initializing = false;
       notifyListeners();
     });
   }
 
+  /// Load user role from Firestore
+  Future<void> _loadUserRole() async {
+    if (_user == null) return;
+    
+    try {
+      _userRole = await _userService.getUserRole(_user!.uid);
+      _roleLoaded = true;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading user role: $e');
+      _userRole = UserService.roleStudent;
+      _roleLoaded = true;
+      notifyListeners();
+    }
+  }
+
   User? get user => _user;
   bool get initializing => _initializing;
   bool get isSignedIn => _user != null;
+  String get userRole => _userRole;
+  bool get isAdmin => _userRole == UserService.roleAdmin;
+  bool get isStudent => _userRole == UserService.roleStudent;
+  bool get roleLoaded => _roleLoaded;
 
   /// Sign in with Google, but only allow Hopkins.edu email addresses
   /// Validates domain before completing Firebase authentication
@@ -80,6 +114,17 @@ class AuthState extends ChangeNotifier {
       );
 
       await _auth.signInWithCredential(credential);
+      
+      // Store user email in Firestore and load user role after successful sign-in
+      if (_auth.currentUser != null) {
+        final currentUser = _auth.currentUser!;
+        // Store/update user email in Firestore
+        await _userService.updateUserProfile(currentUser.uid, {
+          'email': currentUser.email ?? '',
+          'displayName': currentUser.displayName ?? '',
+        });
+        await _loadUserRole();
+      }
     } on PlatformException catch (e) {
       debugPrint('Google sign-in PlatformException: ${e.code} - ${e.message}');
       // Handle specific platform errors

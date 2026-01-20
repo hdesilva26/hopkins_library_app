@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../explore/explore_page.dart';
 import '../my_books/my_books_page.dart';
 import '../groups/groups_page.dart';
 import '../profile/profile_page.dart';
 import '../admin/add_book_page.dart';
+import '../../services/auth_state.dart';
 
 /// Main navigation screen with bottom navigation bar
 /// Manages four main sections: Explore, My Books, Groups, and Profile
@@ -69,18 +71,25 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      // Floating action button to add books (only shown on Explore tab)
+      // Floating action button to add books (only shown on Explore tab for admins)
       floatingActionButton: _selectedIndex == 0
-          ? FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const AddBookPage(),
-                  ),
+          ? Consumer<AuthState>(
+              builder: (context, auth, _) {
+                // Only show Add Book button for admins
+                if (!auth.isAdmin) return const SizedBox.shrink();
+                
+                return FloatingActionButton.extended(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const AddBookPage(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Book'),
                 );
               },
-              icon: const Icon(Icons.add),
-              label: const Text('Add Book'),
             )
           : null,
     );
