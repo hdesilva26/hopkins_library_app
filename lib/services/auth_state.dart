@@ -3,11 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+/// Authentication state management
+/// Handles Google Sign-In with domain restriction to Hopkins.edu accounts
 class AuthState extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Use ONE GoogleSignIn instance (avoid logout bugs)
-  // Configure with web client ID for Android (from Firebase Console)
+  // Single GoogleSignIn instance to avoid logout bugs
+  // Configured with email scope for user identification
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email'],
   );
@@ -16,7 +18,9 @@ class AuthState extends ChangeNotifier {
   bool _initializing = true;
 
   AuthState() {
+    // Check if user is already signed in
     _user = _auth.currentUser;
+    // Listen for authentication state changes (sign in/out)
     _auth.authStateChanges().listen((user) {
       _user = user;
       _initializing = false;
@@ -28,12 +32,15 @@ class AuthState extends ChangeNotifier {
   bool get initializing => _initializing;
   bool get isSignedIn => _user != null;
 
+  /// Sign in with Google, but only allow Hopkins.edu email addresses
+  /// Validates domain before completing Firebase authentication
   Future<void> signInWithGoogle() async {
     try {
+      // Step 1: Initiate Google Sign-In flow
       final googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return; // cancelled
+      if (googleUser == null) return; // User cancelled sign-in
 
-      // Check domain BEFORE signing into Firebase
+      // Step 2: Extract and validate email domain BEFORE Firebase sign-in
       final email = googleUser.email?.toLowerCase()?.trim();
       if (email == null || email.isEmpty) {
         await _googleSignIn.signOut();
@@ -42,7 +49,7 @@ class AuthState extends ChangeNotifier {
 
       debugPrint('Sign-in attempt with email: $email');
 
-      // Allow main domain or any subdomain (e.g. students.hopkins.edu)
+      // Step 3: Parse email to extract domain
       final emailParts = email.split('@');
       if (emailParts.length != 2) {
         await _googleSignIn.signOut();
@@ -52,10 +59,9 @@ class AuthState extends ChangeNotifier {
       final allowedDomain = emailParts.last.trim();
       debugPrint('Extracted domain: $allowedDomain');
 
-      // Check if domain is exactly 'hopkins.edu' or ends with '.hopkins.edu'
+      // Step 4: Validate domain is Hopkins.edu or subdomain (e.g. students.hopkins.edu)
       final isValidDomain = allowedDomain == 'hopkins.edu' ||
-          (allowedDomain.endsWith('.hopkins.edu') && 
-           allowedDomain.length > '.hopkins.edu'.length);
+          allowedDomain.endsWith('.hopkins.edu');
 
       debugPrint('Domain validation result: $isValidDomain');
 
@@ -64,8 +70,10 @@ class AuthState extends ChangeNotifier {
         throw Exception('Please use your Hopkins school Google account. (Domain: $allowedDomain)');
       }
 
+      // Step 5: Get authentication credentials from Google
       final googleAuth = await googleUser.authentication;
 
+      // Step 6: Create Firebase credential and sign in
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,

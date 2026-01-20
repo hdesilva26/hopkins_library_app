@@ -5,6 +5,8 @@ import '../../models/book.dart';
 import '../../models/app_state.dart';
 import '../../widgets/book_cover_image.dart';
 
+/// Book detail page showing full information about a book
+/// Includes cover image, metadata, and shelf management button
 class BookDetailPage extends StatelessWidget {
   final Book book;
 
@@ -13,6 +15,7 @@ class BookDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    // Get current shelf status for this book
     final status = state.statusFor(book);
 
     return Scaffold(
@@ -43,31 +46,44 @@ class BookDetailPage extends StatelessWidget {
                       book.title,
                       style: const TextStyle(
                           fontSize: 20, fontWeight: FontWeight.bold),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 4),
                     Text(
                       book.author,
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey.shade700,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 4),
                     Row(
                       children: [
                         Icon(Icons.star,
                             size: 18, color: Colors.grey.shade700),
                         const SizedBox(width: 4),
-                        Text(
-                          '${book.rating.toStringAsFixed(1)} (${book.ratingCount})',
-                          style: const TextStyle(fontSize: 13),
+                        Flexible(
+                          child: Text(
+                            '${book.rating.toStringAsFixed(1)} (${book.ratingCount})',
+                            style: const TextStyle(fontSize: 13),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                     ),
+                    const SizedBox(height: 4),
                     Text(
                       '${book.genre} • ${book.pages} pages',
                       style:
                           TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 12),
+                    // Button to add/change book's shelf status
                     _ShelfButton(
                       book: book,
                       currentStatus: status,
@@ -117,6 +133,8 @@ class BookDetailPage extends StatelessWidget {
   }
 }
 
+/// Button widget for managing book's shelf status
+/// Shows popup menu to add book to Want to Read, Reading, Finished, or remove from shelf
 class _ShelfButton extends StatelessWidget {
   final Book book;
   final ShelfStatus? currentStatus;
@@ -130,7 +148,9 @@ class _ShelfButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
       onPressed: () async {
+        // Provide haptic feedback for better UX
         HapticFeedback.lightImpact();
+        // Show popup menu with shelf options
         final newStatus = await showMenu<ShelfStatus?>(
           context: context,
           position: const RelativeRect.fromLTRB(0, 0, 0, 0),
@@ -182,8 +202,10 @@ class _ShelfButton extends StatelessWidget {
           ],
         );
 
+        // Update book status if user made a selection
         if (newStatus != null || (newStatus == null && currentStatus != null)) {
           HapticFeedback.mediumImpact();
+          // Update state and notify listeners to rebuild UI
           context.read<AppState>().setStatus(book, newStatus);
         }
       },

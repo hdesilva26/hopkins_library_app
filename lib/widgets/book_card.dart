@@ -3,9 +3,11 @@ import '../models/book.dart';
 import '../screens/book_detail/book_detail_page.dart';
 import 'book_cover_image.dart';
 
+/// Book card widget for displaying books in horizontal lists
+/// Features: Press animation, Hero animation for navigation, book metadata display
 class BookCard extends StatefulWidget {
   final Book book;
-  final bool large;
+  final bool large;  // Use larger size for featured sections
 
   const BookCard({
     super.key,
@@ -26,6 +28,7 @@ class _BookCardState extends State<BookCard>
   @override
   void initState() {
     super.initState();
+    // Set up press animation for tactile feedback
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 150),
@@ -46,6 +49,7 @@ class _BookCardState extends State<BookCard>
     final width = widget.large ? 140.0 : 120.0;
 
     return GestureDetector(
+      // Handle press animations for better user feedback
       onTapDown: (_) {
         setState(() => _isPressed = true);
         _controller.forward();
@@ -53,6 +57,7 @@ class _BookCardState extends State<BookCard>
       onTapUp: (_) {
         setState(() => _isPressed = false);
         _controller.reverse();
+        // Navigate to book detail page on tap
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => BookDetailPage(book: widget.book),
@@ -72,6 +77,7 @@ class _BookCardState extends State<BookCard>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Hero animation for smooth cover image transition to detail page
               Hero(
                 tag: 'book_cover_${widget.book.id}',
                 child: Material(

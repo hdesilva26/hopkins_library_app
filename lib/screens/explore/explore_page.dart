@@ -5,7 +5,10 @@ import '../../models/book.dart';
 import '../../widgets/book_card.dart';
 import '../../widgets/book_list_tile.dart';
 import '../../widgets/common_widgets.dart';
+import '../admin/add_book_page.dart';
 
+/// Explore page for discovering books
+/// Features: Search, genre filtering, trending books, top rated, and personalized recommendations
 class ExplorePage extends StatefulWidget {
   const ExplorePage({super.key});
 
@@ -21,13 +24,16 @@ class _ExplorePageState extends State<ExplorePage> {
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, state, _) {
+        // Start with all books, then apply filters
         List<Book> visibleBooks = state.allBooks;
 
+        // Filter by selected genre
         if (_selectedGenre != null && _selectedGenre!.isNotEmpty) {
           visibleBooks =
               visibleBooks.where((b) => b.genre == _selectedGenre).toList();
         }
 
+        // Filter by search query (searches title and author)
         if (_searchQuery.isNotEmpty) {
           final q = _searchQuery.toLowerCase();
           visibleBooks = visibleBooks.where((b) {
@@ -36,6 +42,7 @@ class _ExplorePageState extends State<ExplorePage> {
           }).toList();
         }
 
+        // Get curated book lists for display
         final trending = state.trendingBooks;
         final topRated = state.topRatedBooks;
         final recs = state.recommendations();
@@ -91,7 +98,9 @@ class _ExplorePageState extends State<ExplorePage> {
                 ),
               ],
 
+              // Show curated sections when not searching
               if (_searchQuery.isEmpty) ...[
+                // Trending books section - horizontal scrolling cards
                 SliverToBoxAdapter(
                   child: SectionHeader(
                     title: 'Trending at Hopkins',
@@ -112,6 +121,7 @@ class _ExplorePageState extends State<ExplorePage> {
                   ),
                 ),
 
+                // Top rated books section
                 SliverToBoxAdapter(
                   child: SectionHeader(
                     title: 'Top Rated',
@@ -132,6 +142,7 @@ class _ExplorePageState extends State<ExplorePage> {
                   ),
                 ),
 
+                // Personalized recommendations based on reading history
                 SliverToBoxAdapter(
                   child: SectionHeader(
                     title: 'Because You Finished…',

@@ -4,6 +4,8 @@ import '../../services/auth_state.dart';
 import '../../models/app_state.dart';
 import '../../widgets/common_widgets.dart';
 
+/// User profile page displaying account info and reading statistics
+/// Shows: User avatar, name, email, reading stats, and sign-out button
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
@@ -41,6 +43,8 @@ class ProfilePage extends StatelessWidget {
                         user.displayName ?? 'Hopkins Student',
                         style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         user.email ?? '',
@@ -48,6 +52,8 @@ class ProfilePage extends StatelessWidget {
                           fontSize: 13,
                           color: Colors.grey.shade700,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -62,11 +68,13 @@ class ProfilePage extends StatelessWidget {
           ),
 
           const SizedBox(height: 12),
+          // Display reading statistics from user's shelves
           StatRow(label: 'Finished', value: state.finishedBooks.length.toString()),
           StatRow(label: 'Reading', value: state.readingBooks.length.toString()),
           StatRow(label: 'Want to Read', value: state.wantToReadBooks.length.toString()),
 
           const Spacer(),
+          
           Center(
             child: ElevatedButton.icon(
               onPressed: () => context.read<AuthState>().signOut(),

@@ -4,6 +4,8 @@ import '../../models/app_state.dart';
 import '../../models/book.dart';
 import '../../widgets/book_list_tile.dart';
 
+/// My Books page - displays user's reading shelves
+/// Three tabs: Want to Read, Reading, and Finished
 class MyBooksPage extends StatelessWidget {
   const MyBooksPage({super.key});
 
@@ -15,6 +17,7 @@ class MyBooksPage extends StatelessWidget {
           length: 3,
           child: Column(
             children: const [
+              // Tab bar for switching between shelf types
               TabBar(
                 tabs: [
                   Tab(text: 'Want to Read'),
@@ -22,6 +25,7 @@ class MyBooksPage extends StatelessWidget {
                   Tab(text: 'Finished'),
                 ],
               ),
+              // Tab views showing books for each shelf
               Expanded(
                 child: TabBarView(
                   children: [
@@ -115,6 +119,8 @@ class _EmptyShelfState extends StatelessWidget {
   }
 }
 
+/// Container widget for displaying a specific shelf's books
+/// Shows empty state if shelf is empty, otherwise displays book list
 class _ShelfListContainer extends StatelessWidget {
   final ShelfStatus type;
 
@@ -124,6 +130,7 @@ class _ShelfListContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
 
+    // Get books for the specific shelf type
     List<Book> books;
     switch (type) {
       case ShelfStatus.wantToRead:
@@ -137,10 +144,12 @@ class _ShelfListContainer extends StatelessWidget {
         break;
     }
 
+    // Show empty state message if shelf is empty
     if (books.isEmpty) {
       return _EmptyShelfState(type: type);
     }
 
+    // Display scrollable list of books with pull-to-refresh
     return RefreshIndicator(
       onRefresh: () async {
         // Simulate refresh delay for better UX

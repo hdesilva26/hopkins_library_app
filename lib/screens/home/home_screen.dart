@@ -3,7 +3,10 @@ import '../explore/explore_page.dart';
 import '../my_books/my_books_page.dart';
 import '../groups/groups_page.dart';
 import '../profile/profile_page.dart';
+import '../admin/add_book_page.dart';
 
+/// Main navigation screen with bottom navigation bar
+/// Manages four main sections: Explore, My Books, Groups, and Profile
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -14,11 +17,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
+  // All four main pages - IndexedStack keeps them in memory for smooth switching
   final _pages = const [
-    ExplorePage(),
-    MyBooksPage(),
-    GroupsPage(),
-    ProfilePage(),
+    ExplorePage(),      // Browse and discover books
+    MyBooksPage(),      // User's reading shelves
+    GroupsPage(),       // Reading groups (coming soon)
+    ProfilePage(),      // User profile and stats
   ];
 
   @override
@@ -29,10 +33,12 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(titles[_selectedIndex]),
       ),
+      // IndexedStack preserves state when switching tabs (better UX than TabBarView)
       body: IndexedStack(
         index: _selectedIndex,
         children: _pages,
       ),
+      // Bottom navigation bar for switching between main sections
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) {
@@ -63,6 +69,20 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+      // Floating action button to add books (only shown on Explore tab)
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const AddBookPage(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('Add Book'),
+            )
+          : null,
     );
   }
 }

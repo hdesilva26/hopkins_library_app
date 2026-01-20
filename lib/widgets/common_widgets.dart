@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
+/// Search bar widget with debouncing to avoid excessive search calls
+/// Includes clear button when text is entered
 class BookSearchBar extends StatefulWidget {
   final String hintText;
   final ValueChanged<String> onChanged;
@@ -43,6 +45,8 @@ class _BookSearchBarState extends State<BookSearchBar> {
     }
   }
 
+  // Debounce search input to avoid calling onChanged on every keystroke
+  // Waits 300ms after user stops typing before triggering search
   void _onSearchChanged(String value) {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 300), () {
@@ -79,6 +83,8 @@ class _BookSearchBarState extends State<BookSearchBar> {
   }
 }
 
+/// Horizontal scrolling genre filter chips
+/// Allows users to filter books by genre or view all books
 class GenreChips extends StatelessWidget {
   final List<String> genres;
   final String? selected;
@@ -97,6 +103,7 @@ class GenreChips extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
+          // "All" chip to clear genre filter
           ChoiceChip(
             label: const Text('All'),
             selected: selected == null,
@@ -107,6 +114,7 @@ class GenreChips extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
+          // Genre chips for each available genre
           ...genres.map(
             (g) => Padding(
               padding: const EdgeInsets.only(right: 8),
@@ -146,6 +154,8 @@ class SectionHeader extends StatelessWidget {
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
           if (subtitle != null) ...[
             const SizedBox(height: 4),
@@ -154,6 +164,8 @@ class SectionHeader extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                   ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ],

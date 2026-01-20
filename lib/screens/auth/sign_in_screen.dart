@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_state.dart';
 
+/// Sign-in screen for Google authentication
+/// Only allows Hopkins.edu email addresses
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
 
@@ -14,6 +16,7 @@ class _SignInScreenState extends State<SignInScreen> {
   bool _loading = false;
   String? _error;
 
+  /// Handle Google sign-in with error handling and loading states
   Future<void> _handleSignIn() async {
     HapticFeedback.mediumImpact();
     setState(() {
@@ -22,8 +25,10 @@ class _SignInScreenState extends State<SignInScreen> {
     });
 
     try {
+      // Attempt Google sign-in (will validate Hopkins.edu domain)
       await context.read<AuthState>().signInWithGoogle();
     } catch (e) {
+      // Show error message if sign-in fails (e.g., wrong domain)
       HapticFeedback.heavyImpact();
       setState(() {
         _error = e.toString().replaceAll('Exception: ', '');
@@ -71,6 +76,8 @@ class _SignInScreenState extends State<SignInScreen> {
                       color: colorScheme.onSurface.withOpacity(0.7),
                     ),
                 textAlign: TextAlign.center,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 32),
               if (_error != null)
@@ -95,6 +102,8 @@ class _SignInScreenState extends State<SignInScreen> {
                             fontSize: 14,
                           ),
                           textAlign: TextAlign.center,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],

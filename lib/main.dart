@@ -12,14 +12,19 @@ import 'services/auth_state.dart';
 // Screens
 import 'screens/auth/auth_gate.dart';
 
+/// Application entry point
+/// Initializes Firebase and sets up state management providers
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase initialization — REQUIRED
+  // Initialize Firebase for authentication and backend services
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // Set up Provider pattern for state management
+  // AuthState: Manages user authentication status
+  // AppState: Manages book data and user shelves
   runApp(
     MultiProvider(
       providers: [
@@ -31,6 +36,8 @@ void main() async {
   );
 }
 
+/// Root application widget
+/// Configures Material Design 3 theme and navigation
 class SummerReadingApp extends StatelessWidget {
   const SummerReadingApp({super.key});
 
@@ -42,7 +49,7 @@ class SummerReadingApp extends StatelessWidget {
         useMaterial3: true,
         colorSchemeSeed: Colors.deepPurple,
         scaffoldBackgroundColor: const Color(0xFFF5F5F7),
-        // Enhanced typography
+        // Custom typography system for consistent text styling
         textTheme: const TextTheme(
           displayLarge: TextStyle(
             fontSize: 32,
@@ -73,15 +80,15 @@ class SummerReadingApp extends StatelessWidget {
             height: 1.5,
           ),
         ),
-        // Enhanced card theme
-        cardTheme: CardTheme(
+        // Card styling with rounded corners and elevation
+        cardTheme: CardThemeData(
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         ),
-        // Enhanced button themes
+        // Button styling with consistent padding and rounded corners
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             elevation: 2,
@@ -91,7 +98,7 @@ class SummerReadingApp extends StatelessWidget {
             ),
           ),
         ),
-        // Smooth page transitions
+        // Page transition animations for smooth navigation
         pageTransitionsTheme: const PageTransitionsTheme(
           builders: {
             TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
@@ -102,6 +109,7 @@ class SummerReadingApp extends StatelessWidget {
           },
         ),
       ),
+      // AuthGate handles authentication routing (shows sign-in or home screen)
       home: const AuthGate(),
     );
   }

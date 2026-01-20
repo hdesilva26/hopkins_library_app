@@ -6,6 +6,8 @@ import '../models/app_state.dart';
 import '../screens/book_detail/book_detail_page.dart';
 import 'book_cover_image.dart';
 
+/// List tile widget for displaying books in vertical lists
+/// Shows book cover, title, author, rating, genre, shelf status, and quick shelf menu
 class BookListTile extends StatelessWidget {
   final Book book;
 
@@ -14,6 +16,7 @@ class BookListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    // Get current shelf status to display badge
     final status = state.statusFor(book);
 
     return Card(
@@ -33,18 +36,29 @@ class BookListTile extends StatelessWidget {
           height: 60,
           size: 'S',
         ),
-        title: Text(book.title),
+        title: Text(
+          book.title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(book.author),
+            Text(
+              book.author,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             Row(
               children: [
                 Icon(Icons.star, size: 14, color: Colors.grey.shade700),
                 const SizedBox(width: 2),
-                Text(
-                  '${book.rating.toStringAsFixed(1)} • ${book.genre}',
-                  style: const TextStyle(fontSize: 12),
+                Flexible(
+                  child: Text(
+                    '${book.rating.toStringAsFixed(1)} • ${book.genre}',
+                    style: const TextStyle(fontSize: 12),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
@@ -56,12 +70,15 @@ class BookListTile extends StatelessWidget {
               ),
           ],
         ),
+        // Quick shelf menu button in the trailing position
         trailing: _ShelfMenu(book: book),
       ),
     );
   }
 }
 
+/// Popup menu widget for quickly changing book's shelf status
+/// Shows checkmark icon if book is on a shelf, plus icon if not
 class _ShelfMenu extends StatelessWidget {
   final Book book;
 

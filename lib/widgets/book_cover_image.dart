@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/book.dart';
 
+/// Book cover image widget with loading and error states
+/// Uses cached network images for performance and shows placeholder if image unavailable
 class BookCoverImage extends StatelessWidget {
   final Book book;
   final double? width;
   final double? height;
   final BoxFit fit;
-  final String size;
+  final String size;  // Image size: 'S' (small), 'M' (medium), or 'L' (large)
 
   const BookCoverImage({
     super.key,
@@ -20,6 +22,7 @@ class BookCoverImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get cover image URL from Open Library API
     final coverUrl = book.getCoverUrl(size: size);
 
     return Container(
@@ -30,6 +33,7 @@ class BookCoverImage extends StatelessWidget {
         color: Colors.grey.shade200,
         border: Border.all(color: Colors.grey.shade300, width: 1),
       ),
+      // Show cached network image if URL is available, otherwise show placeholder
       child: coverUrl != null
           ? ClipRRect(
               borderRadius: BorderRadius.circular(12),
@@ -38,6 +42,7 @@ class BookCoverImage extends StatelessWidget {
                 width: width,
                 height: height,
                 fit: fit,
+                // Show loading indicator while image loads
                 placeholder: (context, url) => Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
@@ -47,6 +52,7 @@ class BookCoverImage extends StatelessWidget {
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black54),
                   ),
                 ),
+                // Show placeholder if image fails to load
                 errorWidget: (context, url, error) => _buildPlaceholder(),
                 fadeInDuration: const Duration(milliseconds: 300),
                 fadeOutDuration: const Duration(milliseconds: 100),
@@ -56,6 +62,8 @@ class BookCoverImage extends StatelessWidget {
     );
   }
 
+  /// Build placeholder widget showing first letter of book title
+  /// Used when cover image is unavailable or fails to load
   Widget _buildPlaceholder() {
     return Container(
       decoration: BoxDecoration(
