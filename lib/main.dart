@@ -47,8 +47,19 @@ class SummerReadingApp extends StatelessWidget {
       title: 'Hopkins Reads',
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: Colors.deepPurple,
-        scaffoldBackgroundColor: const Color(0xFFF5F5F7),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.black,
+          brightness: Brightness.light,
+          primary: Colors.black,
+          onPrimary: Colors.white,
+          secondary: Colors.grey.shade800,
+          onSecondary: Colors.white,
+          surface: Colors.white,
+          onSurface: Colors.black,
+          background: Colors.white,
+          onBackground: Colors.black,
+        ),
+        scaffoldBackgroundColor: Colors.white,
         // Custom typography system for consistent text styling
         textTheme: const TextTheme(
           displayLarge: TextStyle(
@@ -80,23 +91,42 @@ class SummerReadingApp extends StatelessWidget {
             height: 1.5,
           ),
         ),
-        // Card styling with rounded corners and elevation
+        // Card styling - rectangular with black border
         cardTheme: CardThemeData(
-          elevation: 2,
+          elevation: 0,
+          color: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.zero,
+            side: const BorderSide(color: Colors.black, width: 2),
           ),
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         ),
-        // Button styling with consistent padding and rounded corners
+        // Button styling - black and white
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            elevation: 2,
+            elevation: 0,
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.zero,
+              side: const BorderSide(color: Colors.black, width: 2),
             ),
           ),
+        ),
+        // AppBar styling - black background, white text
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: false,
+        ),
+        // Tab bar styling
+        tabBarTheme: const TabBarThemeData(
+          labelColor: Colors.black,
+          unselectedLabelColor: Colors.grey,
+          indicatorColor: Colors.black,
+          indicatorSize: TabBarIndicatorSize.tab,
         ),
         // Page transition animations for smooth navigation
         pageTransitionsTheme: const PageTransitionsTheme(
@@ -114,3 +144,4 @@ class SummerReadingApp extends StatelessWidget {
     );
   }
 }
+

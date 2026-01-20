@@ -29,15 +29,13 @@ class BookCoverImage extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.zero,
         color: Colors.grey.shade200,
-        border: Border.all(color: Colors.grey.shade300, width: 1),
+        border: Border.all(color: Colors.black, width: 1),
       ),
       // Show cached network image if URL is available, otherwise show placeholder
       child: coverUrl != null
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: CachedNetworkImage(
+          ? CachedNetworkImage(
                 imageUrl: coverUrl,
                 width: width,
                 height: height,
@@ -45,7 +43,7 @@ class BookCoverImage extends StatelessWidget {
                 // Show loading indicator while image loads
                 placeholder: (context, url) => Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.zero,
                     color: Colors.grey.shade200,
                   ),
                   child: const Center(
@@ -56,8 +54,7 @@ class BookCoverImage extends StatelessWidget {
                 errorWidget: (context, url, error) => _buildPlaceholder(),
                 fadeInDuration: const Duration(milliseconds: 300),
                 fadeOutDuration: const Duration(milliseconds: 100),
-              ),
-            )
+              )
           : _buildPlaceholder(),
     );
   }
@@ -66,16 +63,18 @@ class BookCoverImage extends StatelessWidget {
   /// Used when cover image is unavailable or fails to load
   Widget _buildPlaceholder() {
     return Container(
+      width: width,
+      height: height,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.zero,
         color: Colors.grey.shade200,
-        border: Border.all(color: Colors.grey.shade300, width: 1),
+        border: Border.all(color: Colors.black, width: 1),
       ),
       child: Center(
         child: Text(
           book.title.isNotEmpty ? book.title[0].toUpperCase() : '?',
-          style: TextStyle(
-            color: Colors.grey.shade700,
+          style: const TextStyle(
+            color: Colors.black,
             fontSize: 36,
             fontWeight: FontWeight.bold,
           ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_state.dart';
 import '../../models/book.dart';
-import '../../widgets/book_list_tile.dart';
+import '../../widgets/bookshelf_view.dart';
 
 /// My Books page - displays user's reading shelves
 /// Three tabs: Want to Read, Reading, and Finished
@@ -25,13 +25,13 @@ class MyBooksPage extends StatelessWidget {
                   Tab(text: 'Finished'),
                 ],
               ),
-              // Tab views showing books for each shelf
+              // Tab views showing bookshelf for each shelf type
               Expanded(
                 child: TabBarView(
                   children: [
-                    _ShelfListContainer(type: ShelfStatus.wantToRead),
-                    _ShelfListContainer(type: ShelfStatus.reading),
-                    _ShelfListContainer(type: ShelfStatus.finished),
+                    _BookshelfContainer(type: ShelfStatus.wantToRead),
+                    _BookshelfContainer(type: ShelfStatus.reading),
+                    _BookshelfContainer(type: ShelfStatus.finished),
                   ],
                 ),
               ),
@@ -83,8 +83,6 @@ class _EmptyShelfState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -94,22 +92,25 @@ class _EmptyShelfState extends StatelessWidget {
             Icon(
               _icon,
               size: 64,
-              color: colorScheme.primary.withOpacity(0.5),
+              color: Colors.grey.shade400,
             ),
             const SizedBox(height: 16),
             Text(
               _message,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.87),
-                  ),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
               _subtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.6),
-                  ),
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -119,12 +120,23 @@ class _EmptyShelfState extends StatelessWidget {
   }
 }
 
-/// Container widget for displaying a specific shelf's books
-/// Shows empty state if shelf is empty, otherwise displays book list
-class _ShelfListContainer extends StatelessWidget {
+/// Container widget for displaying a specific shelf's books as a bookshelf
+/// Shows bookshelf view with horizontal scrolling book covers
+class _BookshelfContainer extends StatelessWidget {
   final ShelfStatus type;
 
-  const _ShelfListContainer({required this.type});
+  const _BookshelfContainer({required this.type});
+
+  String get _shelfLabel {
+    switch (type) {
+      case ShelfStatus.wantToRead:
+        return 'Want to Read';
+      case ShelfStatus.reading:
+        return 'Currently Reading';
+      case ShelfStatus.finished:
+        return 'Finished';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -144,21 +156,26 @@ class _ShelfListContainer extends StatelessWidget {
         break;
     }
 
-    // Show empty state message if shelf is empty
-    if (books.isEmpty) {
-      return _EmptyShelfState(type: type);
-    }
-
-    // Display scrollable list of books with pull-to-refresh
+    // Show bookshelf view
     return RefreshIndicator(
       onRefresh: () async {
-        // Simulate refresh delay for better UX
         await Future.delayed(const Duration(milliseconds: 500));
       },
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        itemCount: books.length,
-        itemBuilder: (context, index) => BookListTile(book: books[index]),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight,
+              ),
+              child: BookshelfView(
+                books: books,
+                shelfLabel: _shelfLabel,
+              ),
+            ),
+          );
+        },
       ),
     );
   }

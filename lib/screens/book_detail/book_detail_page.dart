@@ -52,23 +52,23 @@ class BookDetailPage extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       book.author,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade700,
-                      ),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black87,
+                    ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.star,
-                            size: 18, color: Colors.grey.shade700),
+                        const Icon(Icons.star,
+                            size: 18, color: Colors.black87),
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
                             '${book.rating.toStringAsFixed(1)} (${book.ratingCount})',
-                            style: const TextStyle(fontSize: 13),
+                            style: const TextStyle(fontSize: 13, color: Colors.black87),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -77,8 +77,7 @@ class BookDetailPage extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       '${book.genre} • ${book.pages} pages',
-                      style:
-                          TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                      style: const TextStyle(fontSize: 13, color: Colors.black87),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -113,15 +112,17 @@ class BookDetailPage extends StatelessWidget {
                   if (book.isCommitteePick)
                     Chip(
                       label: const Text('Committee Pick'),
-                      avatar: Icon(Icons.star, size: 18, color: Colors.grey.shade700),
-                      backgroundColor: Colors.grey.shade100,
+                      avatar: const Icon(Icons.star, size: 18, color: Colors.black),
+                      backgroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.black, width: 1),
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
                   if (book.isRequired)
                     Chip(
                       label: const Text('Required Reading'),
-                      avatar: Icon(Icons.assignment, size: 18, color: Colors.grey.shade700),
-                      backgroundColor: Colors.grey.shade100,
+                      avatar: const Icon(Icons.assignment, size: 18, color: Colors.black),
+                      backgroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.black, width: 1),
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
                 ],
