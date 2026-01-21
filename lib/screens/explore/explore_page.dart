@@ -20,6 +20,26 @@ class _ExplorePageState extends State<ExplorePage> {
   String _searchQuery = '';
   String? _selectedGenre;
 
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollController.hasClients) return;
+
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 450),
+        curve: Curves.easeOutCubic,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AppState>(
@@ -29,9 +49,8 @@ class _ExplorePageState extends State<ExplorePage> {
 
         // Filter by selected genre
         if (_selectedGenre != null && _selectedGenre!.isNotEmpty) {
-          visibleBooks = visibleBooks
-              .where((b) => b.genre == _selectedGenre)
-              .toList();
+          visibleBooks =
+              visibleBooks.where((b) => b.genre == _selectedGenre).toList();
         }
 
         // Filter by search query (searches title and author)
@@ -55,6 +74,7 @@ class _ExplorePageState extends State<ExplorePage> {
               await Future.delayed(const Duration(milliseconds: 500));
             },
             child: CustomScrollView(
+              controller: _scrollController,
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
@@ -72,11 +92,17 @@ class _ExplorePageState extends State<ExplorePage> {
                           genres: state.genres,
                           selected: _selectedGenre,
                           onSelected: (genre) {
-                            setState(
-                              () => _selectedGenre = genre == _selectedGenre
-                                  ? null
-                                  : genre,
-                            );
+                            final nextGenre =
+                                (genre == _selectedGenre) ? null : genre;
+
+                            setState(() {
+                              _selectedGenre = nextGenre;
+                            });
+
+                            // Only auto-scroll when selecting a genre (not when clearing)
+                            if (nextGenre != null && nextGenre.isNotEmpty) {
+                              _scrollToBottom();
+                            }
                           },
                         ),
                         const SizedBox(height: 16),
@@ -85,6 +111,7 @@ class _ExplorePageState extends State<ExplorePage> {
                   ),
                 ),
 
+                // Search mode: show results list (no curated sections)
                 if (_searchQuery.isNotEmpty) ...[
                   SliverToBoxAdapter(
                     child: SectionHeader(
@@ -102,9 +129,8 @@ class _ExplorePageState extends State<ExplorePage> {
                   ),
                 ],
 
-                // Show curated sections when not searching
+                // Not searching: show curated sections + browse all/browse by genre at the bottom
                 if (_searchQuery.isEmpty) ...[
-                  // Trending books section - horizontal scrolling cards
                   SliverToBoxAdapter(
                     child: SectionHeader(
                       title: 'Trending at Hopkins',
@@ -125,7 +151,6 @@ class _ExplorePageState extends State<ExplorePage> {
                     ),
                   ),
 
-                  // Top rated books section
                   SliverToBoxAdapter(
                     child: SectionHeader(
                       title: 'Top Rated',
@@ -146,7 +171,6 @@ class _ExplorePageState extends State<ExplorePage> {
                     ),
                   ),
 
-                  // Personalized recommendations based on reading history
                   SliverToBoxAdapter(
                     child: SectionHeader(
                       title: 'Because You Finished…',
@@ -172,6 +196,9 @@ class _ExplorePageState extends State<ExplorePage> {
                       title: _selectedGenre == null
                           ? 'Browse All'
                           : 'Browse: $_selectedGenre',
+                      subtitle: _selectedGenre == null
+                          ? null
+                          : 'Showing ${visibleBooks.length} book${visibleBooks.length == 1 ? '' : 's'}',
                     ),
                   ),
                   SliverList(
