@@ -32,7 +32,9 @@ class ProfilePage extends StatelessWidget {
                             : user.email?[0] ?? '?')
                         .toUpperCase(),
                     style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold),
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -43,7 +45,9 @@ class ProfilePage extends StatelessWidget {
                       Text(
                         user.displayName ?? 'Hopkins Student',
                         style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -70,12 +74,21 @@ class ProfilePage extends StatelessWidget {
 
           const SizedBox(height: 12),
           // Display reading statistics from user's shelves
-          StatRow(label: 'Finished', value: state.finishedBooks.length.toString()),
-          StatRow(label: 'Reading', value: state.readingBooks.length.toString()),
-          StatRow(label: 'Want to Read', value: state.wantToReadBooks.length.toString()),
+          StatRow(
+            label: 'Finished',
+            value: state.finishedBooks.length.toString(),
+          ),
+          StatRow(
+            label: 'Reading',
+            value: state.readingBooks.length.toString(),
+          ),
+          StatRow(
+            label: 'Want to Read',
+            value: state.wantToReadBooks.length.toString(),
+          ),
 
           const Spacer(),
-          
+
           // Admin panel button (only shown for admins)
           if (auth.isAdmin)
             Padding(
@@ -84,31 +97,44 @@ class ProfilePage extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const AdminPanelPage(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const AdminPanelPage()),
                     );
                   },
                   icon: const Icon(Icons.admin_panel_settings),
                   label: const Text('Admin Panel'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
+                    backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                   ),
                 ),
               ),
             ),
-          
+
           Center(
             child: ElevatedButton.icon(
               onPressed: () => context.read<AuthState>().signOut(),
               icon: const Icon(Icons.logout),
               label: const Text('Sign out'),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+              ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
 }
-

@@ -112,6 +112,11 @@ class GenreChips extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
+            backgroundColor: Colors.white,
+            selectedColor: Colors.black,
+            labelStyle: TextStyle(
+              color: selected == null ? Colors.white : Colors.black,
+            ),
           ),
           const SizedBox(width: 8),
           // Genre chips for each available genre
@@ -125,6 +130,11 @@ class GenreChips extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
+                ),
+                backgroundColor: Colors.white,
+                selectedColor: Colors.black,
+                labelStyle: TextStyle(
+                  color: selected == g ? Colors.white : Colors.black,
                 ),
               ),
             ),

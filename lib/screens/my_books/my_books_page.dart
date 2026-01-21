@@ -156,26 +156,15 @@ class _BookshelfContainer extends StatelessWidget {
         break;
     }
 
-    // Show bookshelf view
+    // Show bookshelf view without extra vertical scrolling wrapper to avoid
+    // scrolling conflicts on some devices.
     return RefreshIndicator(
       onRefresh: () async {
         await Future.delayed(const Duration(milliseconds: 500));
       },
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: constraints.maxHeight,
-              ),
-              child: BookshelfView(
-                books: books,
-                shelfLabel: _shelfLabel,
-              ),
-            ),
-          );
-        },
+      child: BookshelfView(
+        books: books,
+        shelfLabel: _shelfLabel,
       ),
     );
   }

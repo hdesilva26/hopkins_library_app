@@ -18,9 +18,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase for authentication and backend services
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Set up Provider pattern for state management
   // AuthState: Manages user authentication status
@@ -47,17 +45,18 @@ class SummerReadingApp extends StatelessWidget {
       title: 'Hopkins Reads',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.black,
-          brightness: Brightness.light,
+        // Enforce strict black/white UI across the app
+        colorScheme: const ColorScheme.light(
           primary: Colors.black,
           onPrimary: Colors.white,
-          secondary: Colors.grey.shade800,
-          onSecondary: Colors.white,
-          surface: Colors.white,
-          onSurface: Colors.black,
           background: Colors.white,
           onBackground: Colors.black,
+          surface: Colors.white,
+          onSurface: Colors.black,
+          secondary: Colors.black,
+          onSecondary: Colors.white,
+          primaryContainer: Colors.white,
+          onPrimaryContainer: Colors.black,
         ),
         scaffoldBackgroundColor: Colors.white,
         // Custom typography system for consistent text styling
@@ -82,21 +81,16 @@ class SummerReadingApp extends StatelessWidget {
             fontWeight: FontWeight.w600,
             letterSpacing: -0.2,
           ),
-          bodyLarge: TextStyle(
-            fontSize: 16,
-            height: 1.5,
-          ),
-          bodyMedium: TextStyle(
-            fontSize: 14,
-            height: 1.5,
-          ),
+          bodyLarge: TextStyle(fontSize: 16, height: 1.5),
+          bodyMedium: TextStyle(fontSize: 14, height: 1.5),
         ),
-        // Card styling - rectangular with black border
+        // Card styling - gentle rounding for a sleek feel without changing
+        // the book cover rectangles used in covers
         cardTheme: CardThemeData(
           elevation: 0,
           color: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero,
+            borderRadius: BorderRadius.circular(12),
             side: const BorderSide(color: Colors.black, width: 2),
           ),
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -121,6 +115,12 @@ class SummerReadingApp extends StatelessWidget {
           elevation: 0,
           centerTitle: false,
         ),
+        // Ensure popups (menus) are black/white
+        popupMenuTheme: const PopupMenuThemeData(
+          color: Colors.white,
+          elevation: 2,
+          textStyle: TextStyle(color: Colors.black),
+        ),
         // Tab bar styling
         tabBarTheme: const TabBarThemeData(
           labelColor: Colors.black,
@@ -144,4 +144,3 @@ class SummerReadingApp extends StatelessWidget {
     );
   }
 }
-

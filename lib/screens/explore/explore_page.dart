@@ -29,8 +29,9 @@ class _ExplorePageState extends State<ExplorePage> {
 
         // Filter by selected genre
         if (_selectedGenre != null && _selectedGenre!.isNotEmpty) {
-          visibleBooks =
-              visibleBooks.where((b) => b.genre == _selectedGenre).toList();
+          visibleBooks = visibleBooks
+              .where((b) => b.genre == _selectedGenre)
+              .toList();
         }
 
         // Filter by search query (searches title and author)
@@ -55,130 +56,133 @@ class _ExplorePageState extends State<ExplorePage> {
             },
             child: CustomScrollView(
               slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BookSearchBar(
-                        hintText: 'Search by title or author',
-                        onChanged: (value) =>
-                            setState(() => _searchQuery = value),
-                      ),
-                      const SizedBox(height: 12),
-                      GenreChips(
-                        genres: state.genres,
-                        selected: _selectedGenre,
-                        onSelected: (genre) {
-                          setState(() =>
-                              _selectedGenre = genre == _selectedGenre ? null : genre);
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BookSearchBar(
+                          hintText: 'Search by title or author',
+                          onChanged: (value) =>
+                              setState(() => _searchQuery = value),
+                        ),
+                        const SizedBox(height: 12),
+                        GenreChips(
+                          genres: state.genres,
+                          selected: _selectedGenre,
+                          onSelected: (genre) {
+                            setState(
+                              () => _selectedGenre = genre == _selectedGenre
+                                  ? null
+                                  : genre,
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+                ),
+
+                if (_searchQuery.isNotEmpty) ...[
+                  SliverToBoxAdapter(
+                    child: SectionHeader(
+                      title: 'Search Results',
+                      subtitle:
+                          '${visibleBooks.length} book${visibleBooks.length == 1 ? '' : 's'} found',
+                    ),
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) =>
+                          BookListTile(book: visibleBooks[index]),
+                      childCount: visibleBooks.length,
+                    ),
+                  ),
+                ],
+
+                // Show curated sections when not searching
+                if (_searchQuery.isEmpty) ...[
+                  // Trending books section - horizontal scrolling cards
+                  SliverToBoxAdapter(
+                    child: SectionHeader(
+                      title: 'Trending at Hopkins',
+                      subtitle: 'Popular right now',
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 275,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        itemCount: trending.length,
+                        itemBuilder: (context, index) {
+                          return BookCard(book: trending[index], large: true);
                         },
                       ),
-                      const SizedBox(height: 16),
-                    ],
+                    ),
                   ),
-                ),
-              ),
 
-              if (_searchQuery.isNotEmpty) ...[
-                SliverToBoxAdapter(
-                  child: SectionHeader(
-                    title: 'Search Results',
-                    subtitle:
-                        '${visibleBooks.length} book${visibleBooks.length == 1 ? '' : 's'} found',
+                  // Top rated books section
+                  SliverToBoxAdapter(
+                    child: SectionHeader(
+                      title: 'Top Rated',
+                      subtitle: 'Highly rated books',
+                    ),
                   ),
-                ),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) =>
-                        BookListTile(book: visibleBooks[index]),
-                    childCount: visibleBooks.length,
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 245,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        itemCount: topRated.length,
+                        itemBuilder: (context, index) {
+                          return BookCard(book: topRated[index]);
+                        },
+                      ),
+                    ),
                   ),
-                ),
+
+                  // Personalized recommendations based on reading history
+                  SliverToBoxAdapter(
+                    child: SectionHeader(
+                      title: 'Because You Finished…',
+                      subtitle: 'Recommendations just for you',
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 245,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        itemCount: recs.length,
+                        itemBuilder: (context, index) {
+                          return BookCard(book: recs[index]);
+                        },
+                      ),
+                    ),
+                  ),
+
+                  SliverToBoxAdapter(
+                    child: SectionHeader(
+                      title: _selectedGenre == null
+                          ? 'Browse All'
+                          : 'Browse: $_selectedGenre',
+                    ),
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) =>
+                          BookListTile(book: visibleBooks[index]),
+                      childCount: visibleBooks.length,
+                    ),
+                  ),
+                ],
               ],
-
-              // Show curated sections when not searching
-              if (_searchQuery.isEmpty) ...[
-                // Trending books section - horizontal scrolling cards
-                SliverToBoxAdapter(
-                  child: SectionHeader(
-                    title: 'Trending at Hopkins',
-                    subtitle: 'Popular right now',
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 230,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      itemCount: trending.length,
-                      itemBuilder: (context, index) {
-                        return BookCard(book: trending[index], large: true);
-                      },
-                    ),
-                  ),
-                ),
-
-                // Top rated books section
-                SliverToBoxAdapter(
-                  child: SectionHeader(
-                    title: 'Top Rated',
-                    subtitle: 'Highly rated books',
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 210,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      itemCount: topRated.length,
-                      itemBuilder: (context, index) {
-                        return BookCard(book: topRated[index]);
-                      },
-                    ),
-                  ),
-                ),
-
-                // Personalized recommendations based on reading history
-                SliverToBoxAdapter(
-                  child: SectionHeader(
-                    title: 'Because You Finished…',
-                    subtitle: 'Recommendations just for you',
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: 210,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      itemCount: recs.length,
-                      itemBuilder: (context, index) {
-                        return BookCard(book: recs[index]);
-                      },
-                    ),
-                  ),
-                ),
-
-                SliverToBoxAdapter(
-                  child: SectionHeader(
-                    title: _selectedGenre == null
-                        ? 'Browse All'
-                        : 'Browse: $_selectedGenre',
-                  ),
-                ),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) =>
-                        BookListTile(book: visibleBooks[index]),
-                    childCount: visibleBooks.length,
-                  ),
-                ),
-              ],
-            ],
             ),
           ),
         );
@@ -186,4 +190,3 @@ class _ExplorePageState extends State<ExplorePage> {
     );
   }
 }
-
