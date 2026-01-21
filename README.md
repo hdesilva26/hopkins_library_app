@@ -1,3 +1,3 @@
 # Hopkins Library App
 
-This app is mean to replace the Hopkins Summer Reading Guide
+This app is meant to replace the Hopkins Summer Reading Guide
