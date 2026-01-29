@@ -13,9 +13,7 @@ class AuthState extends ChangeNotifier {
 
   // Single GoogleSignIn instance to avoid logout bugs
   // Configured with email scope for user identification
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email'],
-  );
+  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
 
   User? _user;
   bool _initializing = true;
@@ -45,7 +43,7 @@ class AuthState extends ChangeNotifier {
   /// Load user role from Firestore
   Future<void> _loadUserRole() async {
     if (_user == null) return;
-    
+
     try {
       _userRole = await _userService.getUserRole(_user!.uid);
       _roleLoaded = true;
@@ -86,22 +84,33 @@ class AuthState extends ChangeNotifier {
       // Step 3: Parse email to extract domain
       final emailParts = email.split('@');
       if (emailParts.length != 2) {
+        debugPrint('Email validation failed: Invalid email format for $email');
         await _googleSignIn.signOut();
-        throw Exception('Invalid email format.');
+        throw Exception(
+          'Invalid email format. Please use a valid email address.',
+        );
       }
 
       final allowedDomain = emailParts.last.trim();
       debugPrint('Extracted domain: $allowedDomain');
 
       // Step 4: Validate domain is Hopkins.edu or subdomain (e.g. students.hopkins.edu)
-      final isValidDomain = allowedDomain == 'hopkins.edu' ||
+      final isValidDomain =
+          allowedDomain == 'hopkins.edu' ||
           allowedDomain.endsWith('.hopkins.edu');
 
-      debugPrint('Domain validation result: $isValidDomain');
+      debugPrint(
+        'Domain validation result: $isValidDomain for domain: $allowedDomain',
+      );
 
       if (!isValidDomain) {
+        debugPrint(
+          'Security: Rejecting sign-in attempt from non-Hopkins domain: $allowedDomain',
+        );
         await _googleSignIn.signOut();
-        throw Exception('Please use your Hopkins school Google account. (Domain: $allowedDomain)');
+        throw Exception(
+          'Access denied. Please use your Hopkins school Google account. (Attempted domain: $allowedDomain)',
+        );
       }
 
       // Step 5: Get authentication credentials from Google
@@ -114,7 +123,7 @@ class AuthState extends ChangeNotifier {
       );
 
       await _auth.signInWithCredential(credential);
-      
+
       // Store user email in Firestore and load user role after successful sign-in
       if (_auth.currentUser != null) {
         final currentUser = _auth.currentUser!;
@@ -129,11 +138,20 @@ class AuthState extends ChangeNotifier {
       debugPrint('Google sign-in PlatformException: ${e.code} - ${e.message}');
       // Handle specific platform errors
       if (e.code == 'sign_in_failed' || e.code == 'sign_in_canceled') {
-        throw Exception('Google Sign-In failed. Please check your Firebase configuration and ensure the package name matches.');
+        debugPrint(
+          'Authentication failed: Platform error ${e.code} - Check Firebase configuration',
+        );
+        throw Exception(
+          'Google Sign-In failed. Please check your Firebase configuration and ensure the package name matches.',
+        );
       }
+      debugPrint(
+        'Unexpected platform error during sign-in: ${e.code} - ${e.message}',
+      );
       rethrow;
     } catch (e) {
       debugPrint('Google sign-in error: $e');
+      debugPrint('Error type: ${e.runtimeType}');
       rethrow;
     }
   }
@@ -145,4 +163,3 @@ class AuthState extends ChangeNotifier {
     await _auth.signOut();
   }
 }
-

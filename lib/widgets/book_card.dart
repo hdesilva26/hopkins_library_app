@@ -18,6 +18,7 @@ class BookCard extends StatefulWidget {
 class _BookCardState extends State<BookCard>
     with SingleTickerProviderStateMixin {
   bool _isPressed = false;
+  bool _isFavorited = false;
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
@@ -81,49 +82,104 @@ class _BookCardState extends State<BookCard>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Hero animation for smooth cover image transition to detail page
+                // Hero animation with modern rounded corners and shadow
                 Hero(
                   tag: 'book_cover_${widget.book.id}',
-                  child: Material(
-                    color: Colors.transparent,
-                    child: BookCoverImage(
-                      book: widget.book,
-                      width: width,
-                      height: coverHeight,
-                      size: widget.large ? 'L' : 'M',
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.12),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(24.0),
+                          child: BookCoverImage(
+                            book: widget.book,
+                            width: width,
+                            height: coverHeight,
+                            size: widget.large ? 'L' : 'M',
+                          ),
+                        ),
+                        // Favorite overlay button
+                        Positioned(
+                          top: 8,
+                          right: 8,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() => _isFavorited = !_isFavorited);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.9),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                _isFavorited
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                size: 16,
+                                color: _isFavorited
+                                    ? Colors.red.shade400
+                                    : Colors.grey.shade600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 Text(
                   widget.book.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 10,
+                  style: TextStyle(
+                    fontSize: widget.large ? 12 : 11,
                     fontWeight: FontWeight.w600,
-                    height: 1.1,
+                    height: 1.2,
+                    color: const Color(0xFF2D3748),
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
                   widget.book.author,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 9, color: Colors.grey.shade700),
+                  style: TextStyle(
+                    fontSize: widget.large ? 10 : 9,
+                    color: const Color(0xFF718096),
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 6),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.star, size: 10, color: Colors.grey.shade700),
-                    const SizedBox(width: 2),
+                    Icon(Icons.star, size: 12, color: Colors.amber.shade600),
+                    const SizedBox(width: 4),
                     Flexible(
                       child: Text(
                         widget.book.rating.toStringAsFixed(1),
                         style: const TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w500,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF2D3748),
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -132,9 +188,9 @@ class _BookCardState extends State<BookCard>
                     Flexible(
                       child: Text(
                         '(${widget.book.ratingCount})',
-                        style: TextStyle(
-                          fontSize: 8,
-                          color: Colors.grey.shade600,
+                        style: const TextStyle(
+                          fontSize: 9,
+                          color: Color(0xFF718096),
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),

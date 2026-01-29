@@ -56,28 +56,63 @@ class _BookSearchBarState extends State<BookSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: _controller,
-      onChanged: _onSearchChanged,
-      decoration: InputDecoration(
-        prefixIcon: const Icon(Icons.search),
-        suffixIcon: _hasText
-            ? IconButton(
-                icon: const Icon(Icons.clear),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(32.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: _controller,
+        onChanged: _onSearchChanged,
+        decoration: InputDecoration(
+          prefixIcon: Icon(Icons.search, color: Colors.grey.shade600),
+          suffixIcon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_hasText)
+                IconButton(
+                  icon: Icon(Icons.clear, color: Colors.grey.shade600),
+                  onPressed: () {
+                    _controller.clear();
+                    widget.onChanged('');
+                  },
+                ),
+              IconButton(
+                icon: Icon(Icons.tune, color: Colors.grey.shade600),
                 onPressed: () {
-                  _controller.clear();
-                  widget.onChanged('');
+                  // TODO: Implement filter options
                 },
-              )
-            : null,
-        hintText: widget.hintText,
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: BorderSide.none,
+              ),
+            ],
+          ),
+          hintText: widget.hintText,
+          hintStyle: TextStyle(color: Colors.grey.shade500),
+          filled: true,
+          fillColor: Colors.transparent,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(32.0),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(32.0),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(32.0),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       ),
     );
   }
@@ -104,42 +139,83 @@ class GenreChips extends StatelessWidget {
       child: Row(
         children: [
           // "All" chip to clear genre filter
-          ChoiceChip(
-            label: const Text('All'),
-            selected: selected == null,
-            onSelected: (_) => onSelected(null),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            backgroundColor: Colors.white,
-            selectedColor: Colors.black,
-            labelStyle: TextStyle(
-              color: selected == null ? Colors.white : Colors.black,
-            ),
+          _buildPillChip(
+            label: 'All',
+            isSelected: selected == null,
+            onTap: () => onSelected(null),
+            isFirst: true,
           ),
           const SizedBox(width: 8),
           // Genre chips for each available genre
-          ...genres.map(
-            (g) => Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: ChoiceChip(
-                label: Text(g),
-                selected: selected == g,
-                onSelected: (_) => onSelected(g),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                backgroundColor: Colors.white,
-                selectedColor: Colors.black,
-                labelStyle: TextStyle(
-                  color: selected == g ? Colors.white : Colors.black,
-                ),
+          ...genres.asMap().entries.map((entry) {
+            final index = entry.key;
+            final genre = entry.value;
+            final isLast = index == genres.length - 1;
+            return Padding(
+              padding: EdgeInsets.only(right: isLast ? 0 : 8),
+              child: _buildPillChip(
+                label: genre,
+                isSelected: selected == genre,
+                onTap: () => onSelected(genre),
+                isFirst: false,
+                isLast: isLast,
               ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPillChip({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+    bool isFirst = false,
+    bool isLast = false,
+  }) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFF2D3748) : Colors.white,
+            borderRadius: BorderRadius.circular(32.0),
+            border: Border.all(
+              color: isSelected
+                  ? const Color(0xFF2D3748)
+                  : const Color(0xFFE2E8F0),
+              width: 1,
+            ),
+            boxShadow: [
+              if (!isSelected)
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              if (isSelected)
+                BoxShadow(
+                  color: const Color(0xFF2D3748).withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+            ],
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.white : const Color(0xFF2D3748),
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              fontSize: 14,
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -154,16 +230,15 @@ class SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:
-          const EdgeInsets.only(left: 16, right: 16, top: 24, bottom: 12),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 24, bottom: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -172,8 +247,8 @@ class SectionHeader extends StatelessWidget {
             Text(
               subtitle!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                  ),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -197,13 +272,9 @@ class StatRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(child: Text(label)),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),
     );
   }
 }
-
