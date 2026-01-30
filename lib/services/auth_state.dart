@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'user_service.dart';
+import '../models/app_state.dart';
 
 /// Authentication state management
 /// Handles Google Sign-In with domain restriction to Hopkins.edu accounts
@@ -19,6 +20,11 @@ class AuthState extends ChangeNotifier {
   bool _initializing = true;
   String _userRole = UserService.roleStudent;
   bool _roleLoaded = false;
+  AppState? _appState;
+
+  void setAppState(AppState appState) {
+    _appState = appState;
+  }
 
   AuthState() {
     // Check if user is already signed in
@@ -31,6 +37,8 @@ class AuthState extends ChangeNotifier {
       _user = user;
       if (user != null) {
         _loadUserRole();
+        // Load user shelf data when user signs in
+        _loadUserShelf();
       } else {
         _userRole = UserService.roleStudent;
         _roleLoaded = false;
@@ -38,6 +46,16 @@ class AuthState extends ChangeNotifier {
       _initializing = false;
       notifyListeners();
     });
+  }
+
+  Future<void> _loadUserShelf() async {
+    if (_appState != null && _user != null) {
+      try {
+        await _appState!.loadUserShelf(_user!.uid);
+      } catch (e) {
+        debugPrint('Error loading user shelf: $e');
+      }
+    }
   }
 
   /// Load user role from Firestore
@@ -62,6 +80,7 @@ class AuthState extends ChangeNotifier {
   String get userRole => _userRole;
   bool get isAdmin => _userRole == UserService.roleAdmin;
   bool get isStudent => _userRole == UserService.roleStudent;
+  bool get isTeacher => _userRole == UserService.roleTeacher;
   bool get roleLoaded => _roleLoaded;
 
   /// Sign in with Google, but only allow Hopkins.edu email addresses
@@ -133,6 +152,8 @@ class AuthState extends ChangeNotifier {
           'displayName': currentUser.displayName ?? '',
         });
         await _loadUserRole();
+        // Load user shelf data after successful sign-in
+        _loadUserShelf();
       }
     } on PlatformException catch (e) {
       debugPrint('Google sign-in PlatformException: ${e.code} - ${e.message}');

@@ -23,11 +23,15 @@ void main() async {
   // Set up Provider pattern for state management
   // AuthState: Manages user authentication status
   // AppState: Manages book data and user shelves
+  final authState = AuthState();
+  final appState = AppState();
+  authState.setAppState(appState);
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthState()),
-        ChangeNotifierProvider(create: (_) => AppState()),
+        ChangeNotifierProvider(create: (_) => authState),
+        ChangeNotifierProvider(create: (_) => appState),
       ],
       child: const SummerReadingApp(),
     ),

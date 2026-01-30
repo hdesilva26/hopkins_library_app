@@ -71,7 +71,17 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     
-    // User shelf entries - personal book tracking
+    // User shelf sub-collection - personal book tracking
+    match /users/{userId}/shelf/{bookId} {
+      // Users can read their own shelf entries
+      allow read: if isOwner(userId);
+      // Users can create and update their own shelf entries
+      allow write: if isOwner(userId);
+      // Admins can read all shelf entries for oversight
+      allow read: if isAdmin();
+    }
+    
+    // Legacy user shelf entries - personal book tracking (for backward compatibility)
     match /userShelfEntries/{userId} {
       // Users can read their own shelf entries
       allow read: if request.auth != null && request.auth.uid == userId;

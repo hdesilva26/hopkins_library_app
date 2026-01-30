@@ -7,6 +7,7 @@ class UserService {
 
   /// User roles enum
   static const String roleStudent = 'student';
+  static const String roleTeacher = 'teacher';
   static const String roleAdmin = 'admin';
 
   /// Get user role from Firestore
@@ -17,17 +18,17 @@ class UserService {
           .collection(_collectionName)
           .doc(userId)
           .get();
-      
+
       if (doc.exists) {
         return doc.data()?['role'] as String? ?? roleStudent;
       }
-      
+
       // If user doesn't exist in Firestore, create them as student
       await _firestore.collection(_collectionName).doc(userId).set({
         'role': roleStudent,
         'createdAt': FieldValue.serverTimestamp(),
       });
-      
+
       return roleStudent;
     } catch (e) {
       // On error, default to student
@@ -56,7 +57,7 @@ class UserService {
           .collection(_collectionName)
           .doc(userId)
           .get();
-      
+
       return doc.data();
     } catch (e) {
       return null;
@@ -64,11 +65,13 @@ class UserService {
   }
 
   /// Update user profile
-  Future<void> updateUserProfile(String userId, Map<String, dynamic> data) async {
+  Future<void> updateUserProfile(
+    String userId,
+    Map<String, dynamic> data,
+  ) async {
     await _firestore.collection(_collectionName).doc(userId).set({
       ...data,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
 }
-

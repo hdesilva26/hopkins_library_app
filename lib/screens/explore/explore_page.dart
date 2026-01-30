@@ -5,7 +5,6 @@ import '../../models/book.dart';
 import '../../widgets/book_card.dart';
 import '../../widgets/book_list_tile.dart';
 import '../../widgets/common_widgets.dart';
-import '../admin/add_book_page.dart';
 import '../../services/auth_state.dart';
 
 /// Explore page for discovering books
@@ -20,6 +19,49 @@ class ExplorePage extends StatefulWidget {
 class _ExplorePageState extends State<ExplorePage> {
   String _searchQuery = '';
   String? _selectedGenre;
+  List<Book> _recommendations = [];
+  bool _isLoadingRecommendations = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecommendations();
+  }
+
+  Future<void> _loadRecommendations() async {
+    final auth = context.read<AuthState>();
+    final state = context.read<AppState>();
+
+    setState(() {
+      _isLoadingRecommendations = true;
+    });
+
+    try {
+      if (auth.user != null) {
+        final recs = await state.recommendations(userId: auth.user!.uid);
+        if (mounted) {
+          setState(() {
+            _recommendations = recs;
+            _isLoadingRecommendations = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _recommendations = state.recommendationsSync();
+            _isLoadingRecommendations = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _recommendations = state.trendingBooks; // Fallback
+          _isLoadingRecommendations = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,13 +89,24 @@ class _ExplorePageState extends State<ExplorePage> {
         // Get curated book lists for display
         final trending = state.trendingBooks;
         final topRated = state.topRatedBooks;
-        final recs = state.recommendations();
+        final recs = _isLoadingRecommendations ? <Book>[] : _recommendations;
 
         return SafeArea(
           child: RefreshIndicator(
             onRefresh: () async {
-              // Simulate refresh delay
-              await Future.delayed(const Duration(milliseconds: 500));
+              try {
+                await state.refreshBooks();
+              } catch (e) {
+                // Show error if refresh fails
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to refresh: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
             },
             child: CustomScrollView(
               slivers: [
@@ -210,25 +263,32 @@ class _ExplorePageState extends State<ExplorePage> {
                   const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
                   // Personalized recommendations based on reading history
-                  SliverToBoxAdapter(
-                    child: SectionHeader(
-                      title: 'Because You Finished…',
-                      subtitle: 'Recommendations just for you',
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 265, // Increased height
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        itemCount: recs.length,
-                        itemBuilder: (context, index) {
-                          return BookCard(book: recs[index]);
-                        },
+                  if (recs.isNotEmpty) ...[
+                    SliverToBoxAdapter(
+                      child: SectionHeader(
+                        title: 'Because You Finished…',
+                        subtitle: 'Recommendations just for you',
                       ),
                     ),
-                  ),
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 265, // Increased height
+                        child: _isLoadingRecommendations
+                            ? const Center(child: CircularProgressIndicator())
+                            : ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
+                                itemCount: recs.length,
+                                itemBuilder: (context, index) {
+                                  return BookCard(book: recs[index]);
+                                },
+                              ),
+                      ),
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                  ],
 
                   SliverToBoxAdapter(
                     child: SectionHeader(
