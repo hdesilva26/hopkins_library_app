@@ -1,18 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../services/auth_state.dart';
 import '../../services/user_service.dart';
 
 /// Admin panel for managing user roles
-/// Allows admins to promote users to admin or demote them to student
+/// Allows admins to change users between student / teacher / admin
 class AdminPanelPage extends StatelessWidget {
   const AdminPanelPage({super.key});
+
+  // If your UserService doesn't have roleTeacher yet, add it there.
+  // Keeping them here as a fallback is also fine.
+  static const List<String> _roles = <String>[
+    UserService.roleStudent,
+    UserService.roleTeacher,
+    UserService.roleAdmin,
+  ];
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthState>();
-    
+
     // Only admins can access this page
     if (!auth.isAdmin) {
       return Scaffold(
@@ -67,45 +76,66 @@ class AdminPanelPage extends StatelessWidget {
               final userDoc = users[index];
               final userId = userDoc.id;
               final userData = userDoc.data() as Map<String, dynamic>;
-              // Try to get email from Firestore, fallback to Firebase Auth user email
-              String email = userData['email'] as String? ?? 
-                            (userId == auth.user?.uid ? (auth.user?.email ?? 'Unknown') : 'Unknown');
-              final role = userData['role'] as String? ?? UserService.roleStudent;
+
               final isCurrentUser = userId == auth.user?.uid;
+
+              final email = (userData['email'] as String?) ??
+                  (isCurrentUser ? (auth.user?.email ?? 'Unknown') : 'Unknown');
+
+              final roleRaw = userData['role'] as String?;
+              final currentRole = _roles.contains(roleRaw)
+                  ? roleRaw!
+                  : UserService.roleStudent; // safe default
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
-                child: ListTile(
-                  title: Text(email),
-                  subtitle: Text('Role: ${role.toUpperCase()}'),
-                  trailing: isCurrentUser
-                      ? Chip(
-                          label: const Text('You'),
-                          backgroundColor: Colors.blue.shade100,
-                        )
-                      : role == UserService.roleAdmin
-                          ? ElevatedButton(
-                              onPressed: () => _changeUserRole(
-                                context,
-                                userId,
-                                UserService.roleStudent,
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange,
-                              ),
-                              child: const Text('Make Student'),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: ListTile(
+                    title: Text(email),
+                    subtitle: Text('UID: $userId'),
+                    trailing: SizedBox(
+                      width: 170,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          if (isCurrentUser)
+                            Chip(
+                              label: const Text('You'),
+                              backgroundColor: Colors.blue.shade100,
                             )
-                          : ElevatedButton(
-                              onPressed: () => _changeUserRole(
-                                context,
-                                userId,
-                                UserService.roleAdmin,
+                          else
+                            DropdownButtonFormField<String>(
+                              value: currentRole,
+                              isDense: true,
+                              decoration: const InputDecoration(
+                                labelText: 'Role',
+                                border: OutlineInputBorder(),
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 10,
+                                ),
                               ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                              ),
-                              child: const Text('Make Admin'),
+                              items: _roles
+                                  .map(
+                                    (r) => DropdownMenuItem<String>(
+                                      value: r,
+                                      child: Text(_prettyRole(r)),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (newRole) async {
+                                if (newRole == null || newRole == currentRole) {
+                                  return;
+                                }
+                                await _changeUserRole(context, userId, newRole);
+                              },
                             ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               );
             },
@@ -113,6 +143,18 @@ class AdminPanelPage extends StatelessWidget {
         },
       ),
     );
+  }
+
+  static String _prettyRole(String role) {
+    switch (role) {
+      case UserService.roleAdmin:
+        return 'Admin';
+      case UserService.roleTeacher:
+        return 'Teacher';
+      case UserService.roleStudent:
+      default:
+        return 'Student';
+    }
   }
 
   Future<void> _changeUserRole(
@@ -127,7 +169,7 @@ class AdminPanelPage extends StatelessWidget {
       await userService.setUserRole(userId, newRole);
       scaffoldMessenger.showSnackBar(
         SnackBar(
-          content: Text('User role changed to ${newRole.toUpperCase()}'),
+          content: Text('User role changed to ${_prettyRole(newRole)}'),
           backgroundColor: Colors.green,
         ),
       );
@@ -141,4 +183,3 @@ class AdminPanelPage extends StatelessWidget {
     }
   }
 }
-

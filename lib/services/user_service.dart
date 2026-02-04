@@ -5,29 +5,29 @@ class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _collectionName = 'users';
 
-  /// User roles enum
+  /// User roles
   static const String roleStudent = 'student';
+  static const String roleTeacher = 'teacher'; // ADD THIS
   static const String roleAdmin = 'admin';
 
   /// Get user role from Firestore
   /// Returns 'student' by default if user doesn't exist or has no role
   Future<String> getUserRole(String userId) async {
     try {
-      final doc = await _firestore
-          .collection(_collectionName)
-          .doc(userId)
-          .get();
-      
+      final doc =
+          await _firestore.collection(_collectionName).doc(userId).get();
+
       if (doc.exists) {
-        return doc.data()?['role'] as String? ?? roleStudent;
+        final role = doc.data()?['role'] as String?;
+        return role ?? roleStudent;
       }
-      
+
       // If user doesn't exist in Firestore, create them as student
       await _firestore.collection(_collectionName).doc(userId).set({
         'role': roleStudent,
         'createdAt': FieldValue.serverTimestamp(),
       });
-      
+
       return roleStudent;
     } catch (e) {
       // On error, default to student
@@ -36,6 +36,7 @@ class UserService {
   }
 
   /// Set user role (admin only operation)
+  /// Accepts: student | teacher | admin
   Future<void> setUserRole(String userId, String role) async {
     await _firestore.collection(_collectionName).doc(userId).set({
       'role': role,
@@ -49,14 +50,17 @@ class UserService {
     return role == roleAdmin;
   }
 
+  /// Check if user is teacher
+  Future<bool> isTeacher(String userId) async {
+    final role = await getUserRole(userId);
+    return role == roleTeacher;
+  }
+
   /// Get user profile data
   Future<Map<String, dynamic>?> getUserProfile(String userId) async {
     try {
-      final doc = await _firestore
-          .collection(_collectionName)
-          .doc(userId)
-          .get();
-      
+      final doc =
+          await _firestore.collection(_collectionName).doc(userId).get();
       return doc.data();
     } catch (e) {
       return null;
@@ -71,4 +75,3 @@ class UserService {
     }, SetOptions(merge: true));
   }
 }
-
