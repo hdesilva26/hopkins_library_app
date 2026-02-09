@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../explore/explore_page.dart';
 import '../my_books/my_books_page.dart';
-import '../groups/groups_page.dart';
 import '../profile/profile_page.dart';
+import '../teacher/teacher_panel_page.dart';
 import '../admin/add_book_page.dart';
 import '../../services/auth_state.dart';
 
@@ -19,96 +19,116 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  // All four main pages - IndexedStack keeps them in memory for smooth switching
-  final _pages = const [
-    ExplorePage(), // Browse and discover books
-    MyBooksPage(), // User's reading shelves
-    GroupsPage(), // Reading groups (coming soon)
-    ProfilePage(), // User profile and stats
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final titles = ['Explore', 'My Books', 'Groups', 'Profile'];
+    return Consumer<AuthState>(
+      builder: (context, auth, _) {
+        // Build pages and navigation items dynamically based on user role
+        final pages = <Widget>[
+          const ExplorePage(),
+          const MyBooksPage(),
+          // Insert Classes page for teachers/admins between My Books and Groups
+          if (auth.isTeacher || auth.isAdmin) const TeacherPanelPage(),
+          const ProfilePage(),
+        ];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(titles[_selectedIndex]),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-      ),
-      // IndexedStack preserves state when switching tabs (better UX than TabBarView)
-      body: Container(
-        decoration: const BoxDecoration(color: Color(0xFFF7FAFC)),
-        child: IndexedStack(index: _selectedIndex, children: _pages),
-      ),
-      // Floating pill-shaped navigation bar
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(32.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: 16,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildNavItem(
-              icon: Icons.explore_outlined,
-              activeIcon: Icons.explore,
-              label: 'Explore',
-              index: 0,
-            ),
-            _buildNavItem(
-              icon: Icons.menu_book_outlined,
-              activeIcon: Icons.menu_book,
-              label: 'My Books',
-              index: 1,
-            ),
-            _buildNavItem(
-              icon: Icons.group_outlined,
-              activeIcon: Icons.group,
-              label: 'Groups',
-              index: 2,
-            ),
-            _buildNavItem(
-              icon: Icons.person_outline,
-              activeIcon: Icons.person,
-              label: 'Profile',
-              index: 3,
-            ),
-          ],
-        ),
-      ),
-      // Floating action button to add books (only shown on Explore tab for admins)
-      floatingActionButton: _selectedIndex == 0
-          ? Consumer<AuthState>(
-              builder: (context, auth, _) {
-                // Only show Add Book button for admins
-                if (!auth.isAdmin) return const SizedBox.shrink();
+        final navItems = <Map<String, dynamic>>[
+          {
+            'icon': Icons.explore_outlined,
+            'activeIcon': Icons.explore,
+            'label': 'Explore',
+          },
+          {
+            'icon': Icons.menu_book_outlined,
+            'activeIcon': Icons.menu_book,
+            'label': 'My Books',
+          },
+          // Insert Classes navigation for teachers/admins
+          if (auth.isTeacher || auth.isAdmin)
+            {
+              'icon': Icons.school_outlined,
+              'activeIcon': Icons.school,
+              'label': 'Classes',
+            },
+          {
+            'icon': Icons.person_outline,
+            'activeIcon': Icons.person,
+            'label': 'Profile',
+          },
+        ];
 
-                return FloatingActionButton.extended(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const AddBookPage()),
+        final titles = <String>[
+          'Explore',
+          'My Books',
+          if (auth.isTeacher || auth.isAdmin) 'Classes',
+          'Profile',
+        ];
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(titles[_selectedIndex]),
+            backgroundColor: Colors.white,
+            elevation: 0,
+            surfaceTintColor: Colors.transparent,
+          ),
+          // IndexedStack preserves state when switching tabs
+          body: Container(
+            decoration: const BoxDecoration(color: Color(0xFFF7FAFC)),
+            child: IndexedStack(index: _selectedIndex, children: pages),
+          ),
+          // Floating pill-shaped navigation bar
+          bottomNavigationBar: Container(
+            margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(32.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(
+                navItems.length,
+                (index) => _buildNavItem(
+                  icon: navItems[index]['icon'] as IconData,
+                  activeIcon: navItems[index]['activeIcon'] as IconData,
+                  label: navItems[index]['label'] as String,
+                  index: index,
+                ),
+              ),
+            ),
+          ),
+          // Floating action button to add books (only shown on Explore tab for admins)
+          floatingActionButton: _selectedIndex == 0
+              ? Consumer<AuthState>(
+                  builder: (context, auth, _) {
+                    // Only show Add Book button for admins
+                    if (!auth.isAdmin) return const SizedBox.shrink();
+
+                    return FloatingActionButton.extended(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const AddBookPage(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add Book'),
+                      backgroundColor: const Color(0xFF2D3748),
+                      foregroundColor: Colors.white,
                     );
                   },
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Book'),
-                  backgroundColor: const Color(0xFF2D3748),
-                  foregroundColor: Colors.white,
-                );
-              },
-            )
-          : null,
+                )
+              : null,
+        );
+      },
     );
   }
 

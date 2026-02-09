@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/auth_state.dart';
 import '../../services/user_service.dart';
 import '../../services/class_service.dart';
+import 'create_class_page.dart';
+import '../../models/class_model.dart';
 // import 'student_profile_page.dart'; // Will create this next
 import '../../models/book.dart';
 
@@ -20,12 +22,11 @@ class _TeacherPanelPageState extends State<TeacherPanelPage> {
   final TextEditingController _searchController = TextEditingController();
   final ClassService _classService = ClassService();
   String _selectedClassId = '';
-  List<Map<String, dynamic>> _teacherClasses = [];
 
   @override
   void initState() {
     super.initState();
-    _loadTeacherClasses();
+    // No need to load classes manually, StreamBuilder will handle it
   }
 
   @override
@@ -34,29 +35,12 @@ class _TeacherPanelPageState extends State<TeacherPanelPage> {
     super.dispose();
   }
 
-  Future<void> _loadTeacherClasses() async {
-    final auth = context.read<AuthState>();
-    if (auth.user?.uid != null) {
-      final classesSnapshot = await _classService
-          .getTeacherClasses(auth.user!.uid)
-          .first;
-      setState(() {
-        _teacherClasses = classesSnapshot
-            .map((cls) => {'id': cls.id, 'name': cls.name})
-            .toList();
-        if (_teacherClasses.isNotEmpty) {
-          _selectedClassId = _teacherClasses.first['id'];
-        }
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthState>();
 
     // Only teachers can access this page
-    if (!auth.isTeacher) {
+    if (!auth.isTeacher && !auth.isAdmin) {
       return Scaffold(
         appBar: AppBar(title: const Text('Teacher Panel')),
         body: const Center(
@@ -64,6 +48,9 @@ class _TeacherPanelPageState extends State<TeacherPanelPage> {
         ),
       );
     }
+
+    // Get the stream of classes
+    final classesStream = _classService.getTeacherClasses(auth.user?.uid ?? '');
 
     return Scaffold(
       appBar: AppBar(
@@ -80,75 +67,147 @@ class _TeacherPanelPageState extends State<TeacherPanelPage> {
               ),
             ),
           ),
-        ),
+        ), // PreferredSize
+      ), // AppBar
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CreateClassPage()),
+          );
+          // StreamBuilder updates automatically, no need to manually refresh
+        },
+        icon: const Icon(Icons.add),
+        label: const Text('New Class'),
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
       ),
-      body: Column(
-        children: [
-          // Class selection and search bar
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Class selector
-                if (_teacherClasses.isNotEmpty) ...[
-                  const Text(
-                    'Select Class:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: _selectedClassId.isNotEmpty
-                        ? _selectedClassId
-                        : null,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Choose a class',
-                    ),
-                    items: _teacherClasses.map((cls) {
-                      return DropdownMenuItem<String>(
-                        value: cls['id'],
-                        child: Text(cls['name']),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedClassId = value ?? '';
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                ],
+      body: StreamBuilder<List<ClassModel>>(
+        stream: classesStream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-                // Search bar for adding students
-                const Text(
-                  'Add Student to Class:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Error loading classes: ${snapshot.error}\n\nMake sure the Firestore index exists.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.red),
                 ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    hintText: 'Search by email or name...',
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.search),
-                      onPressed: _searchAndAddStudent,
-                    ),
-                  ),
-                  onSubmitted: (_) => _searchAndAddStudent(),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          }
 
-          // Students list
-          Expanded(
-            child: _selectedClassId.isEmpty && _teacherClasses.isNotEmpty
-                ? const Center(child: Text('Please select a class'))
-                : _buildStudentsList(),
-          ),
-        ],
+          final classes = snapshot.data ?? [];
+
+          // Convert to the map format the rest of the file expects, or refactor the rest
+          // Let's refactor the _teacherClasses logic to rely on this data
+
+          // Logic to update _teacherClasses and _selectedClassId
+          // This is a bit tricky inside build.
+          // Better approach: Use the snapshot data directly in the UI.
+
+          // However, to keep minimal changes, I will rebuild the UI here.
+
+          if (classes.isEmpty) {
+            return const Center(
+              child: Text("No classes yet. Tap 'New Class' to create one."),
+            );
+          }
+
+          // Auto-select first class if none selected
+          if (_selectedClassId.isEmpty && classes.isNotEmpty) {
+            // Defer state update
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted && _selectedClassId.isEmpty) {
+                setState(() {
+                  _selectedClassId = classes.first.id;
+                });
+              }
+            });
+          }
+
+          return Column(
+            children: [
+              // Class selection and search bar
+              Container(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Class selector
+                    const Text(
+                      'Select Class:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value:
+                          _selectedClassId.isNotEmpty &&
+                              classes.any((c) => c.id == _selectedClassId)
+                          ? _selectedClassId
+                          : null,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Choose a class',
+                      ),
+                      items: classes.map((cls) {
+                        String teacherName = cls.teacherName;
+                        if (teacherName == 'Unknown Teacher' &&
+                            cls.teacherId == auth.user?.uid) {
+                          teacherName =
+                              auth.user?.displayName ??
+                              auth.user?.email ??
+                              'Me';
+                        }
+                        return DropdownMenuItem<String>(
+                          value: cls.id,
+                          child: Text('$teacherName - ${cls.name}'),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedClassId = value ?? '';
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Search bar for adding students
+                    const Text(
+                      'Add Student to Class:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        hintText: 'Search by email or name...',
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.search),
+                          onPressed: _searchAndAddStudent,
+                        ),
+                      ),
+                      onSubmitted: (_) => _searchAndAddStudent(),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Students list
+              Expanded(
+                child: _selectedClassId.isEmpty
+                    ? const Center(child: Text('Please select a class'))
+                    : _buildStudentsList(),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -357,6 +416,10 @@ class _TeacherPanelPageState extends State<TeacherPanelPage> {
       ),
     );
     */
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
   }
 
   void _showMessage(String message, {bool isError = false}) {

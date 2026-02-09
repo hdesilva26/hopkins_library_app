@@ -12,12 +12,14 @@ class ClassService {
   Future<String> createClass({
     required String name,
     required String teacherId,
+    required String teacherName,
   }) async {
     final docRef = _firestore.collection(_classesCollection).doc();
     final classModel = ClassModel(
       id: docRef.id,
       name: name,
       teacherId: teacherId,
+      teacherName: teacherName,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
