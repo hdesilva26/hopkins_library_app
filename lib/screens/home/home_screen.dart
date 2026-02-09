@@ -4,11 +4,12 @@ import '../explore/explore_page.dart';
 import '../my_books/my_books_page.dart';
 import '../groups/groups_page.dart';
 import '../profile/profile_page.dart';
+import '../teacher/teacher_panel_page.dart';
 import '../admin/add_book_page.dart';
 import '../../services/auth_state.dart';
 
 /// Main navigation screen with bottom navigation bar
-/// Manages four main sections: Explore, My Books, Groups, and Profile
+/// Dynamically shows Classes tab for teachers/admins
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -19,80 +20,103 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  // All four main pages - IndexedStack keeps them in memory for smooth switching
-  final _pages = const [
-    ExplorePage(),      // Browse and discover books
-    MyBooksPage(),      // User's reading shelves
-    GroupsPage(),       // Reading groups (coming soon)
-    ProfilePage(),      // User profile and stats
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final titles = ['Explore', 'My Books', 'Groups', 'Profile'];
+    return Consumer<AuthState>(
+      builder: (context, auth, _) {
+        // Debug: Print role information
+        print('🔍 DEBUG: User role = ${auth.userRole}');
+        print('🔍 DEBUG: isTeacher = ${auth.isTeacher}');
+        print('🔍 DEBUG: isAdmin = ${auth.isAdmin}');
+        print(
+          '🔍 DEBUG: Should show Classes = ${auth.isTeacher || auth.isAdmin}',
+        );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(titles[_selectedIndex]),
-      ),
-      // IndexedStack preserves state when switching tabs (better UX than TabBarView)
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
-      // Bottom navigation bar for switching between main sections
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() => _selectedIndex = index);
-        },
-        elevation: 4,
-        height: 70,
-        destinations: const [
-          NavigationDestination(
+        // Build pages and destinations dynamically based on user role
+        final pages = <Widget>[
+          const ExplorePage(),
+          const MyBooksPage(),
+          // Insert Classes page for teachers/admins between My Books and Groups
+          if (auth.isTeacher || auth.isAdmin) const TeacherPanelPage(),
+          const GroupsPage(),
+          const ProfilePage(),
+        ];
+
+        final destinations = <NavigationDestination>[
+          const NavigationDestination(
             icon: Icon(Icons.explore_outlined),
             selectedIcon: Icon(Icons.explore),
             label: 'Explore',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.menu_book_outlined),
             selectedIcon: Icon(Icons.menu_book),
             label: 'My Books',
           ),
-          NavigationDestination(
+          // Insert Classes destination for teachers/admins
+          if (auth.isTeacher || auth.isAdmin)
+            const NavigationDestination(
+              icon: Icon(Icons.school_outlined),
+              selectedIcon: Icon(Icons.school),
+              label: 'Classes',
+            ),
+          const NavigationDestination(
             icon: Icon(Icons.group_outlined),
             selectedIcon: Icon(Icons.group),
             label: 'Groups',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.person_outline),
             selectedIcon: Icon(Icons.person),
             label: 'Profile',
           ),
-        ],
-      ),
-      // Floating action button to add books (only shown on Explore tab for admins)
-      floatingActionButton: _selectedIndex == 0
-          ? Consumer<AuthState>(
-              builder: (context, auth, _) {
-                // Only show Add Book button for admins
-                if (!auth.isAdmin) return const SizedBox.shrink();
-                
-                return FloatingActionButton.extended(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const AddBookPage(),
-                      ),
+        ];
+
+        final titles = <String>[
+          'Explore',
+          'My Books',
+          if (auth.isTeacher || auth.isAdmin) 'Classes',
+          'Groups',
+          'Profile',
+        ];
+
+        return Scaffold(
+          appBar: AppBar(title: Text(titles[_selectedIndex])),
+          // IndexedStack preserves state when switching tabs
+          body: IndexedStack(index: _selectedIndex, children: pages),
+          // Bottom navigation bar with dynamic destinations
+          bottomNavigationBar: NavigationBar(
+            selectedIndex: _selectedIndex,
+            onDestinationSelected: (index) {
+              setState(() => _selectedIndex = index);
+            },
+            elevation: 4,
+            height: 70,
+            destinations: destinations,
+          ),
+          // Floating action button to add books (only shown on Explore tab for admins)
+          floatingActionButton: _selectedIndex == 0
+              ? Consumer<AuthState>(
+                  builder: (context, auth, _) {
+                    // Only show Add Book button for admins
+                    if (!auth.isAdmin) return const SizedBox.shrink();
+
+                    return FloatingActionButton.extended(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const AddBookPage(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add Book'),
                     );
                   },
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Book'),
-                );
-              },
-            )
-          : null,
+                )
+              : null,
+        );
+      },
     );
   }
 }
-
