@@ -6,6 +6,7 @@ import '../../widgets/book_card.dart';
 import '../../widgets/book_list_tile.dart';
 import '../../widgets/common_widgets.dart';
 import '../admin/add_book_page.dart';
+import '../required/required_books_page.dart';
 
 /// Explore page for discovering books
 /// Features: Search, genre filtering, trending books, top rated, and personalized recommendations
@@ -49,8 +50,9 @@ class _ExplorePageState extends State<ExplorePage> {
 
         // Filter by selected genre
         if (_selectedGenre != null && _selectedGenre!.isNotEmpty) {
-          visibleBooks =
-              visibleBooks.where((b) => b.genre == _selectedGenre).toList();
+          visibleBooks = visibleBooks
+              .where((b) => b.genre == _selectedGenre)
+              .toList();
         }
 
         // Filter by search query (searches title and author)
@@ -92,8 +94,9 @@ class _ExplorePageState extends State<ExplorePage> {
                           genres: state.genres,
                           selected: _selectedGenre,
                           onSelected: (genre) {
-                            final nextGenre =
-                                (genre == _selectedGenre) ? null : genre;
+                            final nextGenre = (genre == _selectedGenre)
+                                ? null
+                                : genre;
 
                             setState(() {
                               _selectedGenre = nextGenre;
@@ -106,6 +109,82 @@ class _ExplorePageState extends State<ExplorePage> {
                           },
                         ),
                         const SizedBox(height: 16),
+
+                        // Required Books Section
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.2),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.assignment_turned_in,
+                                color: Theme.of(context).colorScheme.primary,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Required Reading',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                          ),
+                                    ),
+                                    Text(
+                                      '${state.allBooks.where((b) => b.isRequired).length} books required',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface
+                                                .withOpacity(0.7),
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              TextButton.icon(
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => const RequiredBooksPage(),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.arrow_forward, size: 16),
+                                label: const Text('View All'),
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
