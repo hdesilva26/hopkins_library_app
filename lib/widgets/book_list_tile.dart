@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../models/book.dart';
 import '../models/app_state.dart';
+import '../services/auth_state.dart';
 import '../screens/book_detail/book_detail_page.dart';
 import 'book_cover_image.dart';
 
@@ -24,31 +25,16 @@ class BookListTile extends StatelessWidget {
       elevation: 1,
       child: ListTile(
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => BookDetailPage(book: book),
-            ),
-          );
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => BookDetailPage(book: book)));
         },
-        leading: BookCoverImage(
-          book: book,
-          width: 40,
-          height: 60,
-          size: 'S',
-        ),
-        title: Text(
-          book.title,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
+        leading: BookCoverImage(book: book, width: 40, height: 60, size: 'S'),
+        title: Text(book.title, maxLines: 2, overflow: TextOverflow.ellipsis),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              book.author,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            Text(book.author, maxLines: 1, overflow: TextOverflow.ellipsis),
             Row(
               children: [
                 Icon(Icons.star, size: 14, color: Colors.grey.shade700),
@@ -66,7 +52,9 @@ class BookListTile extends StatelessWidget {
               Text(
                 status.label,
                 style: const TextStyle(
-                    fontSize: 11, fontStyle: FontStyle.italic),
+                  fontSize: 11,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
           ],
         ),
@@ -91,12 +79,11 @@ class _ShelfMenu extends StatelessWidget {
 
     return PopupMenuButton<ShelfStatus?>(
       initialValue: status,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onSelected: (value) {
         HapticFeedback.lightImpact();
-        context.read<AppState>().setStatus(book, value);
+        final auth = context.read<AuthState>();
+        context.read<AppState>().setStatus(book, value, userId: auth.user?.uid);
       },
       itemBuilder: (context) => [
         PopupMenuItem(
@@ -134,7 +121,11 @@ class _ShelfMenu extends StatelessWidget {
           value: null,
           child: Row(
             children: [
-              Icon(Icons.remove_circle_outline, size: 20, color: Colors.grey.shade700),
+              Icon(
+                Icons.remove_circle_outline,
+                size: 20,
+                color: Colors.grey.shade700,
+              ),
               const SizedBox(width: 12),
               Text('Remove', style: TextStyle(color: Colors.grey.shade700)),
             ],
@@ -148,4 +139,3 @@ class _ShelfMenu extends StatelessWidget {
     );
   }
 }
-

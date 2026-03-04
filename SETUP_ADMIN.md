@@ -26,25 +26,29 @@
 3. You should now see the **Admin Panel** button in your Profile page
 4. The **Add Book** button should appear on the Explore tab
 
-## Alternative: Quick Admin Setup Script
-If you want to set yourself as admin programmatically, you can temporarily add this to your Profile page:
+## Deploying Firestore Security Rules
+After setting up your first admin, deploy the security rules to protect your data:
 
-```dart
-// TEMPORARY: Remove after first admin is set up
-if (auth.userRole == 'student') {
-  ElevatedButton(
-    onPressed: () async {
-      final userService = UserService();
-      await userService.setUserRole(auth.user!.uid, UserService.roleAdmin);
-      // Force refresh
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
-    },
-    child: Text('Make Me Admin (One-Time Setup)'),
-  ),
-}
-```
+1. Install Firebase CLI (if not already installed):
+   ```bash
+   npm install -g firebase-tools
+   ```
+
+2. Login to Firebase:
+   ```bash
+   firebase login
+   ```
+
+3. Deploy the security rules:
+   ```bash
+   firebase deploy --only firestore:rules
+   ```
+
+The security rules are defined in `firestore.rules` and include:
+- Role-based access control for users, books, classes, and enrollments
+- Admin-only permissions for creating/modifying books and user roles
+- Teacher permissions for managing their own classes and enrollments
+- Student permissions for managing their own profiles and enrollments
 
 ## Firestore Collection Structure
 The `users` collection will have documents like this:

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'book.dart';
 import '../services/book_service.dart';
+import '../services/user_shelf_service.dart';
 
 /// Central state management for the app
 /// Manages book collection and user's reading shelves (Want to Read, Reading, Finished)
@@ -11,6 +12,7 @@ class AppState extends ChangeNotifier {
   final Map<String, ShelfStatus> _userShelves = {};
   // Firebase service for book operations
   final BookService _bookService = BookService();
+  final UserShelfService _userShelfService = UserShelfService();
   // Loading state
   bool _isLoading = false;
   String? _error;
@@ -28,12 +30,38 @@ class AppState extends ChangeNotifier {
   // Get the current shelf status for a specific book
   ShelfStatus? statusFor(Book book) => _userShelves[book.key];
 
-  // Update a book's shelf status and notify listeners to rebuild UI
-  void setStatus(Book book, ShelfStatus? status) {
+  // Update a book's shelf status and persist to Firestore
+  Future<void> setStatus(
+    Book book,
+    ShelfStatus? status, {
+    String? userId,
+  }) async {
     if (status == null) {
       _userShelves.remove(book.key);
+      if (userId != null) {
+        try {
+          await _userShelfService.removeBookFromShelf(userId, book.id);
+        } catch (e) {
+          _error = 'Failed to remove book from shelf: $e';
+          notifyListeners();
+          rethrow;
+        }
+      }
     } else {
       _userShelves[book.key] = status;
+      if (userId != null) {
+        try {
+          await _userShelfService.setBookStatus(
+            userId,
+            book.id,
+            status.toString().split('.').last,
+          );
+        } catch (e) {
+          _error = 'Failed to update book status: $e';
+          notifyListeners();
+          rethrow;
+        }
+      }
     }
     notifyListeners();
   }
@@ -45,9 +73,7 @@ class AppState extends ChangeNotifier {
 
   // Helper method to filter books by shelf status, sorted alphabetically
   List<Book> _booksWithStatus(ShelfStatus status) {
-    return _allBooks
-        .where((b) => _userShelves[b.key] == status)
-        .toList()
+    return _allBooks.where((b) => _userShelves[b.key] == status).toList()
       ..sort((a, b) => a.title.compareTo(b.title));
   }
 
@@ -89,15 +115,51 @@ class AppState extends ChangeNotifier {
 
   // Personalized recommendations based on user's reading history
   // If user has finished books, recommend similar books from the same genre
-  // Otherwise, show trending books
-  List<Book> recommendations() {
+  // Uses most recently finished book (based on timestamp from Firestore)
+  Future<List<Book>> recommendations({String? userId}) async {
     if (finishedBooks.isEmpty) return trendingBooks;
+
+    if (userId != null) {
+      try {
+        // Get most recent finished book by timestamp
+        final mostRecent = await _userShelfService.getMostRecentFinishedBook(
+          userId,
+        );
+        if (mostRecent != null) {
+          // Find the corresponding book
+          final lastFinishedBook = _allBooks.firstWhere(
+            (b) => b.id == mostRecent.bookId,
+            orElse: () => finishedBooks.first, // Fallback to first in list
+          );
+
+          return booksByGenre(
+            lastFinishedBook.genre,
+          ).where((b) => b.key != lastFinishedBook.key).take(10).toList();
+        }
+      } catch (e) {
+        // Log error but continue with fallback
+        print('Error getting recent finished book: $e');
+      }
+    }
+
+    // Fallback: use the current in-memory state sorted by ID
     finishedBooks.sort((a, b) => b.id.compareTo(a.id));
     final lastFinished = finishedBooks.first;
-    return booksByGenre(lastFinished.genre)
-        .where((b) => b.key != lastFinished.key)
-        .take(10)
-        .toList();
+    return booksByGenre(
+      lastFinished.genre,
+    ).where((b) => b.key != lastFinished.key).take(10).toList();
+  }
+
+  // Synchronous version for backward compatibility
+  List<Book> recommendationsSync({String? userId}) {
+    if (finishedBooks.isEmpty) return trendingBooks;
+
+    // Fallback: use the current in-memory state sorted by ID
+    finishedBooks.sort((a, b) => b.id.compareTo(a.id));
+    final lastFinished = finishedBooks.first;
+    return booksByGenre(
+      lastFinished.genre,
+    ).where((b) => b.key != lastFinished.key).take(10).toList();
   }
 
   /// Load books from Firebase Firestore
@@ -167,6 +229,64 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  /// Load user shelf data from Firestore
+  Future<void> loadUserShelf(String userId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final shelfEntries = await _userShelfService.getUserShelf(userId);
+      _userShelves.clear();
+
+      for (final entry in shelfEntries) {
+        // Find the corresponding book and map the status
+        final book = _allBooks.firstWhere(
+          (b) => b.id == entry.bookId,
+          orElse: () => Book(
+            id: entry.bookId,
+            title: 'Unknown Book',
+            author: 'Unknown',
+            genre: 'Unknown',
+            pages: 0,
+            rating: 0.0,
+            ratingCount: 0,
+          ),
+        );
+
+        // Map string status to ShelfStatus enum
+        final statusString = entry.shelfStatus.toLowerCase();
+        ShelfStatus? status;
+        switch (statusString) {
+          case 'wanttoread':
+            status = ShelfStatus.wantToRead;
+            break;
+          case 'reading':
+            status = ShelfStatus.reading;
+            break;
+          case 'finished':
+            status = ShelfStatus.finished;
+            break;
+        }
+
+        if (status != null) {
+          _userShelves[book.key] = status;
+        }
+      }
+
+      _error = null;
+    } catch (e) {
+      _error = 'Failed to load user shelf: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Refresh user shelf data
+  Future<void> refreshUserShelf(String userId) async {
+    await loadUserShelf(userId);
+  }
+
   /// Get the next available book ID
   /// Finds the highest ID and adds 1
   int getNextBookId() {
@@ -175,4 +295,3 @@ class AppState extends ChangeNotifier {
     return maxId + 1;
   }
 }
-

@@ -46,31 +46,84 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBrBjmLxb2f1pbJPaUIOSsbYJGWJiSdikw',
-    appId: '1:627822257528:ios:4a11e0e514f4b12244548d',
-    messagingSenderId: '627822257528',
-    projectId: 'hopkins-summer-reading',
-    storageBucket: 'hopkins-summer-reading.firebasestorage.app',
-    iosBundleId: 'com.example.libraryApp',
+  static FirebaseOptions get macos => FirebaseOptions(
+    apiKey: String.fromEnvironment(
+      'MACOS_FIREBASE_API_KEY',
+      defaultValue: 'AIzaSyBrBjmLxb2f1pbJPaUIOSsbYJGWJiSdikw',
+    ),
+    appId: String.fromEnvironment(
+      'MACOS_FIREBASE_APP_ID',
+      defaultValue: '1:627822257528:ios:4a11e0e514f4b12244548d',
+    ),
+    messagingSenderId: String.fromEnvironment(
+      'FIREBASE_MESSAGING_SENDER_ID',
+      defaultValue: '627822257528',
+    ),
+    projectId: String.fromEnvironment(
+      'FIREBASE_PROJECT_ID',
+      defaultValue: 'hopkins-summer-reading',
+    ),
+    storageBucket: String.fromEnvironment(
+      'FIREBASE_STORAGE_BUCKET',
+      defaultValue: 'hopkins-summer-reading.firebasestorage.app',
+    ),
+    iosBundleId: String.fromEnvironment(
+      'IOS_BUNDLE_ID',
+      defaultValue: 'com.example.libraryApp',
+    ),
   );
 
-  static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCNTPmju8wWMiqiync5IX8p3ra3jOPbtFs',
-    appId: '1:627822257528:web:0768cb0a54c6512b44548d',
-    messagingSenderId: '627822257528',
-    projectId: 'hopkins-summer-reading',
-    authDomain: 'hopkins-summer-reading.firebaseapp.com',
-    storageBucket: 'hopkins-summer-reading.firebasestorage.app',
-    measurementId: 'G-FRL2S3SCGZ',
+  static FirebaseOptions get windows => FirebaseOptions(
+    apiKey: String.fromEnvironment(
+      'WINDOWS_FIREBASE_API_KEY',
+      defaultValue: 'AIzaSyCNTPmju8wWMiqiync5IX8p3ra3jOPbtFs',
+    ),
+    appId: String.fromEnvironment(
+      'WINDOWS_FIREBASE_APP_ID',
+      defaultValue: '1:627822257528:web:0768cb0a54c6512b44548d',
+    ),
+    messagingSenderId: String.fromEnvironment(
+      'FIREBASE_MESSAGING_SENDER_ID',
+      defaultValue: '627822257528',
+    ),
+    projectId: String.fromEnvironment(
+      'FIREBASE_PROJECT_ID',
+      defaultValue: 'hopkins-summer-reading',
+    ),
+    authDomain: String.fromEnvironment(
+      'FIREBASE_AUTH_DOMAIN',
+      defaultValue: 'hopkins-summer-reading.firebaseapp.com',
+    ),
+    storageBucket: String.fromEnvironment(
+      'FIREBASE_STORAGE_BUCKET',
+      defaultValue: 'hopkins-summer-reading.firebasestorage.app',
+    ),
+    measurementId: String.fromEnvironment(
+      'FIREBASE_MEASUREMENT_ID',
+      defaultValue: 'G-FRL2S3SCGZ',
+    ),
   );
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDicOAy32YbOhNkwW5y8knsB9LHpXY0z-g',
-    appId: '1:627822257528:android:13439ee3fad6b30d44548d',
-    messagingSenderId: '627822257528',
-    projectId: 'hopkins-summer-reading',
-    storageBucket: 'hopkins-summer-reading.firebasestorage.app',
+  static FirebaseOptions get android => FirebaseOptions(
+    apiKey: String.fromEnvironment(
+      'ANDROID_FIREBASE_API_KEY',
+      defaultValue: 'AIzaSyDicOAy32YbOhNkwW5y8knsB9LHpXY0z-g',
+    ),
+    appId: String.fromEnvironment(
+      'ANDROID_FIREBASE_APP_ID',
+      defaultValue: '1:627822257528:android:13439ee3fad6b30d44548d',
+    ),
+    messagingSenderId: String.fromEnvironment(
+      'FIREBASE_MESSAGING_SENDER_ID',
+      defaultValue: '627822257528',
+    ),
+    projectId: String.fromEnvironment(
+      'FIREBASE_PROJECT_ID',
+      defaultValue: 'hopkins-summer-reading',
+    ),
+    storageBucket: String.fromEnvironment(
+      'FIREBASE_STORAGE_BUCKET',
+      defaultValue: 'hopkins-summer-reading.firebasestorage.app',
+    ),
   );
-
 }

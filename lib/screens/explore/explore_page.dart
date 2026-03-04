@@ -7,6 +7,7 @@ import '../../widgets/book_list_tile.dart';
 import '../../widgets/common_widgets.dart';
 import '../admin/add_book_page.dart';
 import '../required/required_books_page.dart';
+import '../../services/auth_state.dart';
 
 /// Explore page for discovering books
 /// Features: Search, genre filtering, trending books, top rated, and personalized recommendations
@@ -20,6 +21,49 @@ class ExplorePage extends StatefulWidget {
 class _ExplorePageState extends State<ExplorePage> {
   String _searchQuery = '';
   String? _selectedGenre;
+  List<Book> _recommendations = [];
+  bool _isLoadingRecommendations = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecommendations();
+  }
+
+  Future<void> _loadRecommendations() async {
+    final auth = context.read<AuthState>();
+    final state = context.read<AppState>();
+
+    setState(() {
+      _isLoadingRecommendations = true;
+    });
+
+    try {
+      if (auth.user != null) {
+        final recs = await state.recommendations(userId: auth.user!.uid);
+        if (mounted) {
+          setState(() {
+            _recommendations = recs;
+            _isLoadingRecommendations = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _recommendations = state.recommendationsSync();
+            _isLoadingRecommendations = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _recommendations = state.trendingBooks; // Fallback
+          _isLoadingRecommendations = false;
+        });
+      }
+    }
+  }
 
   final ScrollController _scrollController = ScrollController();
 
@@ -67,29 +111,98 @@ class _ExplorePageState extends State<ExplorePage> {
         // Get curated book lists for display
         final trending = state.trendingBooks;
         final topRated = state.topRatedBooks;
-        final recs = state.recommendations();
+        final recs = _isLoadingRecommendations ? <Book>[] : _recommendations;
 
         return SafeArea(
           child: RefreshIndicator(
             onRefresh: () async {
-              // Simulate refresh delay
-              await Future.delayed(const Duration(milliseconds: 500));
+              try {
+                await state.refreshBooks();
+              } catch (e) {
+                // Show error if refresh fails
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to refresh: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
             },
             child: CustomScrollView(
               controller: _scrollController,
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Personalized header with user greeting
+                        Consumer<AuthState>(
+                          builder: (context, auth, _) {
+                            final userName = auth.user?.displayName ?? 'Reader';
+                            final firstName = userName.split(' ').first;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 24,
+                                      backgroundColor: const Color(0xFF2D3748),
+                                      child: Text(
+                                        firstName.isNotEmpty
+                                            ? firstName[0].toUpperCase()
+                                            : 'R',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Hello, $firstName!',
+                                            style: const TextStyle(
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.w700,
+                                              color: Color(0xFF2D3748),
+                                              height: 1.2,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            'Find your next great read',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey.shade600,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 24),
+                              ],
+                            );
+                          },
+                        ),
                         BookSearchBar(
                           hintText: 'Search by title or author',
                           onChanged: (value) =>
                               setState(() => _searchQuery = value),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 20),
                         GenreChips(
                           genres: state.genres,
                           selected: _selectedGenre,
@@ -185,6 +298,7 @@ class _ExplorePageState extends State<ExplorePage> {
                             ],
                           ),
                         ),
+                        const SizedBox(height: 24),
                       ],
                     ),
                   ),
@@ -218,10 +332,10 @@ class _ExplorePageState extends State<ExplorePage> {
                   ),
                   SliverToBoxAdapter(
                     child: SizedBox(
-                      height: 275,
+                      height: 295, // Increased height for larger cards
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         itemCount: trending.length,
                         itemBuilder: (context, index) {
                           return BookCard(book: trending[index], large: true);
@@ -230,6 +344,9 @@ class _ExplorePageState extends State<ExplorePage> {
                     ),
                   ),
 
+                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
+                  // Top rated books section
                   SliverToBoxAdapter(
                     child: SectionHeader(
                       title: 'Top Rated',
@@ -238,10 +355,10 @@ class _ExplorePageState extends State<ExplorePage> {
                   ),
                   SliverToBoxAdapter(
                     child: SizedBox(
-                      height: 245,
+                      height: 265, // Increased height
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         itemCount: topRated.length,
                         itemBuilder: (context, index) {
                           return BookCard(book: topRated[index]);
@@ -254,21 +371,35 @@ class _ExplorePageState extends State<ExplorePage> {
                     child: SectionHeader(
                       title: 'Because You Finished…',
                       subtitle: 'Recommendations just for you',
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 245,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        itemCount: recs.length,
-                        itemBuilder: (context, index) {
-                          return BookCard(book: recs[index]);
-                        },
+                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
+                  // Personalized recommendations based on reading history
+                  if (recs.isNotEmpty) ...[
+                    SliverToBoxAdapter(
+                      child: SectionHeader(
+                        title: 'Because You Finished…',
+                        subtitle: 'Recommendations just for you',
                       ),
                     ),
-                  ),
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 265, // Increased height
+                        child: _isLoadingRecommendations
+                            ? const Center(child: CircularProgressIndicator())
+                            : ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
+                                itemCount: recs.length,
+                                itemBuilder: (context, index) {
+                                  return BookCard(book: recs[index]);
+                                },
+                              ),
+                      ),
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                  ],
 
                   SliverToBoxAdapter(
                     child: SectionHeader(

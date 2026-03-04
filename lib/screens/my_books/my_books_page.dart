@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../models/app_state.dart';
 import '../../models/book.dart';
 import '../../widgets/bookshelf_view.dart';
+import '../../services/auth_state.dart';
 
 /// My Books page - displays user's reading shelves
 /// Three tabs: Want to Read, Reading, and Finished
@@ -89,11 +90,7 @@ class _EmptyShelfState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              _icon,
-              size: 64,
-              color: Colors.grey.shade400,
-            ),
+            Icon(_icon, size: 64, color: Colors.grey.shade400),
             const SizedBox(height: 16),
             Text(
               _message,
@@ -107,10 +104,7 @@ class _EmptyShelfState extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               _subtitle,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
               textAlign: TextAlign.center,
             ),
           ],
@@ -160,13 +154,24 @@ class _BookshelfContainer extends StatelessWidget {
     // scrolling conflicts on some devices.
     return RefreshIndicator(
       onRefresh: () async {
-        await Future.delayed(const Duration(milliseconds: 500));
+        try {
+          final auth = context.read<AuthState>();
+          if (auth.user != null) {
+            await state.refreshUserShelf(auth.user!.uid);
+          }
+        } catch (e) {
+          // Show error if refresh fails
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to refresh shelf: $e'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
       },
-      child: BookshelfView(
-        books: books,
-        shelfLabel: _shelfLabel,
-      ),
+      child: BookshelfView(books: books, shelfLabel: _shelfLabel),
     );
   }
 }
-

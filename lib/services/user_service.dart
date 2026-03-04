@@ -8,6 +8,7 @@ class UserService {
   /// User roles
   static const String roleStudent = 'student';
   static const String roleTeacher = 'teacher'; // ADD THIS
+  static const String roleTeacher = 'teacher';
   static const String roleAdmin = 'admin';
 
   /// Get user role from Firestore
@@ -16,6 +17,10 @@ class UserService {
     try {
       final doc =
           await _firestore.collection(_collectionName).doc(userId).get();
+      final doc = await _firestore
+          .collection(_collectionName)
+          .doc(userId)
+          .get();
 
       if (doc.exists) {
         final role = doc.data()?['role'] as String?;
@@ -61,6 +66,11 @@ class UserService {
     try {
       final doc =
           await _firestore.collection(_collectionName).doc(userId).get();
+      final doc = await _firestore
+          .collection(_collectionName)
+          .doc(userId)
+          .get();
+
       return doc.data();
     } catch (e) {
       return null;
@@ -68,7 +78,10 @@ class UserService {
   }
 
   /// Update user profile
-  Future<void> updateUserProfile(String userId, Map<String, dynamic> data) async {
+  Future<void> updateUserProfile(
+    String userId,
+    Map<String, dynamic> data,
+  ) async {
     await _firestore.collection(_collectionName).doc(userId).set({
       ...data,
       'updatedAt': FieldValue.serverTimestamp(),
