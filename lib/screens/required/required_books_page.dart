@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_state.dart';
 import '../../models/book.dart';
-import '../../widgets/book_card.dart';
 import '../../widgets/book_list_tile.dart';
 import '../../widgets/common_widgets.dart';
-import '../../services/required_books.dart';
 
 /// Required Books page for viewing mandatory reading materials
 /// Shows all books marked as required reading with search and filtering capabilities
@@ -17,7 +15,6 @@ class RequiredBooksPage extends StatefulWidget {
 }
 
 class _RequiredBooksPageState extends State<RequiredBooksPage> {
-  final RequiredBooksService _requiredBooksService = RequiredBooksService();
   String _searchQuery = '';
   String? _selectedGenre;
 
@@ -74,10 +71,10 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
                               colors: [
                                 Theme.of(
                                   context,
-                                ).colorScheme.primary.withOpacity(0.1),
+                                ).colorScheme.primary.withValues(alpha: 0.1),
                                 Theme.of(
                                   context,
-                                ).colorScheme.secondary.withOpacity(0.1),
+                                ).colorScheme.secondary.withValues(alpha: 0.1),
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
@@ -86,7 +83,7 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
                             border: Border.all(
                               color: Theme.of(
                                 context,
-                              ).colorScheme.outline.withOpacity(0.3),
+                              ).colorScheme.outline.withValues(alpha: 0.3),
                             ),
                           ),
                           child: Column(
@@ -121,9 +118,10 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
                                 'Books that must be read for your courses',
                                 style: Theme.of(context).textTheme.bodyMedium
                                     ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurface.withOpacity(0.8),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.8),
                                     ),
                               ),
                               const SizedBox(height: 8),
@@ -131,9 +129,10 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
                                 '${visibleBooks.length} book${visibleBooks.length == 1 ? '' : 's'} available',
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurface.withOpacity(0.6),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.6),
                                     ),
                               ),
                             ],
@@ -180,7 +179,7 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
                             size: 64,
                             color: Theme.of(
                               context,
-                            ).colorScheme.onSurface.withOpacity(0.3),
+                            ).colorScheme.onSurface.withValues(alpha: 0.3),
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -189,9 +188,8 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
                                 : 'No required books available',
                             style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface.withOpacity(0.6),
+                                  color: Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.6),
                                 ),
                           ),
                           if (_searchQuery.isNotEmpty) ...[

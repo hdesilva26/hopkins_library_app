@@ -21,11 +21,9 @@ class BookshelfBook extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => BookDetailPage(book: book),
-          ),
-        );
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => BookDetailPage(book: book)));
       },
       child: Container(
         width: width,
@@ -36,7 +34,7 @@ class BookshelfBook extends StatelessWidget {
           border: Border.all(color: Colors.black, width: 2),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 4,
               offset: const Offset(2, 2),
             ),
@@ -55,4 +53,3 @@ class BookshelfBook extends StatelessWidget {
     );
   }
 }
-

@@ -52,7 +52,7 @@ class _SignInScreenState extends State<SignInScreen> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer.withOpacity(0.3),
+                  color: colorScheme.primaryContainer.withValues(alpha: 0.3),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -65,16 +65,16 @@ class _SignInScreenState extends State<SignInScreen> {
               Text(
                 'Hopkins Reads',
                 style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurface,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
                 'Sign in with your Hopkins Google account to track your summer reading.',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.onSurface.withOpacity(0.7),
-                    ),
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
                 textAlign: TextAlign.center,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
@@ -92,7 +92,11 @@ class _SignInScreenState extends State<SignInScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.error_outline, color: Colors.grey.shade700, size: 20),
+                      Icon(
+                        Icons.error_outline,
+                        color: Colors.grey.shade700,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       Flexible(
                         child: Text(
@@ -120,7 +124,9 @@ class _SignInScreenState extends State<SignInScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.login),
-                  label: Text(_loading ? 'Signing in…' : 'Sign in with Hopkins'),
+                  label: Text(
+                    _loading ? 'Signing in…' : 'Sign in with Hopkins',
+                  ),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
@@ -133,4 +139,3 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 }
-

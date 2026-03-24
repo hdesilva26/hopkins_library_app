@@ -5,7 +5,6 @@ import '../../models/book.dart';
 import '../../widgets/book_card.dart';
 import '../../widgets/book_list_tile.dart';
 import '../../widgets/common_widgets.dart';
-import '../admin/add_book_page.dart';
 import '../required/required_books_page.dart';
 
 /// Explore page for discovering books
@@ -116,14 +115,15 @@ class _ExplorePageState extends State<ExplorePage> {
                           padding: const EdgeInsets.all(16),
                           margin: const EdgeInsets.only(bottom: 16),
                           decoration: BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primaryContainer.withOpacity(0.3),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primaryContainer
+                                .withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: Theme.of(
                                 context,
-                              ).colorScheme.primary.withOpacity(0.2),
+                              ).colorScheme.primary.withValues(alpha: 0.2),
                             ),
                           ),
                           child: Row(
@@ -159,7 +159,7 @@ class _ExplorePageState extends State<ExplorePage> {
                                             color: Theme.of(context)
                                                 .colorScheme
                                                 .onSurface
-                                                .withOpacity(0.7),
+                                                .withValues(alpha: 0.7),
                                           ),
                                     ),
                                   ],

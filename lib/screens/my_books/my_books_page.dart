@@ -43,83 +43,6 @@ class MyBooksPage extends StatelessWidget {
   }
 }
 
-class _EmptyShelfState extends StatelessWidget {
-  final ShelfStatus type;
-
-  const _EmptyShelfState({required this.type});
-
-  String get _message {
-    switch (type) {
-      case ShelfStatus.wantToRead:
-        return 'Start building your reading list';
-      case ShelfStatus.reading:
-        return 'No books in progress';
-      case ShelfStatus.finished:
-        return 'Your completed books will appear here';
-    }
-  }
-
-  String get _subtitle {
-    switch (type) {
-      case ShelfStatus.wantToRead:
-        return 'Explore books and add them to your list';
-      case ShelfStatus.reading:
-        return 'Mark a book as "Reading" to track your progress';
-      case ShelfStatus.finished:
-        return 'Mark books as "Finished" when you complete them';
-    }
-  }
-
-  IconData get _icon {
-    switch (type) {
-      case ShelfStatus.wantToRead:
-        return Icons.bookmark_border;
-      case ShelfStatus.reading:
-        return Icons.menu_book_outlined;
-      case ShelfStatus.finished:
-        return Icons.check_circle_outline;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              _icon,
-              size: 64,
-              color: Colors.grey.shade400,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _message,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _subtitle,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 /// Container widget for displaying a specific shelf's books as a bookshelf
 /// Shows bookshelf view with horizontal scrolling book covers
 class _BookshelfContainer extends StatelessWidget {
@@ -162,11 +85,7 @@ class _BookshelfContainer extends StatelessWidget {
       onRefresh: () async {
         await Future.delayed(const Duration(milliseconds: 500));
       },
-      child: BookshelfView(
-        books: books,
-        shelfLabel: _shelfLabel,
-      ),
+      child: BookshelfView(books: books, shelfLabel: _shelfLabel),
     );
   }
 }
-

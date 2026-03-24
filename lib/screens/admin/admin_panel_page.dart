@@ -41,10 +41,7 @@ class AdminPanelPage extends StatelessWidget {
             padding: EdgeInsets.only(left: 16, right: 16, bottom: 10),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                'Manage User Roles',
-                style: TextStyle(fontSize: 13),
-              ),
+              child: Text('Manage User Roles', style: TextStyle(fontSize: 13)),
             ),
           ),
         ),
@@ -79,7 +76,8 @@ class AdminPanelPage extends StatelessWidget {
 
               final isCurrentUser = userId == auth.user?.uid;
 
-              final email = (userData['email'] as String?) ??
+              final email =
+                  (userData['email'] as String?) ??
                   (isCurrentUser ? (auth.user?.email ?? 'Unknown') : 'Unknown');
 
               final roleRaw = userData['role'] as String?;
@@ -107,7 +105,7 @@ class AdminPanelPage extends StatelessWidget {
                             )
                           else
                             DropdownButtonFormField<String>(
-                              value: currentRole,
+                              initialValue: currentRole,
                               isDense: true,
                               decoration: const InputDecoration(
                                 labelText: 'Role',

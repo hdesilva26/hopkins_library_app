@@ -23,11 +23,7 @@ class BookshelfView extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.book_outlined,
-                size: 64,
-                color: Colors.grey,
-              ),
+              Icon(Icons.book_outlined, size: 64, color: Colors.grey),
               SizedBox(height: 16),
               Text(
                 'No books on this shelf',
@@ -41,10 +37,7 @@ class BookshelfView extends StatelessWidget {
               SizedBox(height: 8),
               Text(
                 'Add books to see them here',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black54,
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.black54),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -77,11 +70,7 @@ class BookshelfView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: books.length,
             itemBuilder: (context, index) {
-              return BookshelfBook(
-                book: books[index],
-                width: 120,
-                height: 180,
-              );
+              return BookshelfBook(book: books[index], width: 120, height: 180);
             },
           ),
         ),
@@ -93,7 +82,7 @@ class BookshelfView extends StatelessWidget {
             color: Colors.black,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -105,4 +94,3 @@ class BookshelfView extends StatelessWidget {
     );
   }
 }
-

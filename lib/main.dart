@@ -49,8 +49,6 @@ class SummerReadingApp extends StatelessWidget {
         colorScheme: const ColorScheme.light(
           primary: Colors.black,
           onPrimary: Colors.white,
-          background: Colors.white,
-          onBackground: Colors.black,
           surface: Colors.white,
           onSurface: Colors.black,
           secondary: Colors.black,

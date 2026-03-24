@@ -17,7 +17,6 @@ class BookCard extends StatefulWidget {
 
 class _BookCardState extends State<BookCard>
     with SingleTickerProviderStateMixin {
-  bool _isPressed = false;
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
@@ -55,11 +54,9 @@ class _BookCardState extends State<BookCard>
     return GestureDetector(
       // Handle press animations for better user feedback
       onTapDown: (_) {
-        setState(() => _isPressed = true);
         _controller.forward();
       },
       onTapUp: (_) {
-        setState(() => _isPressed = false);
         _controller.reverse();
         // Navigate to book detail page on tap
         Navigator.of(context).push(
@@ -67,7 +64,6 @@ class _BookCardState extends State<BookCard>
         );
       },
       onTapCancel: () {
-        setState(() => _isPressed = false);
         _controller.reverse();
       },
       // Give the card proper book cover proportions with flexible height

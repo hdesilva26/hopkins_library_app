@@ -8,7 +8,7 @@ class RequiredBooksService {
   final String _collectionName = 'books';
 
   /// Get all required books from Firestore
-  /// Returns a Stream that emits List<Book> whenever the collection changes
+  /// Returns a Stream that emits List of Book whenever the collection changes
   Stream<List<Book>> getRequiredBooks() {
     return _firestore
         .collection(_collectionName)

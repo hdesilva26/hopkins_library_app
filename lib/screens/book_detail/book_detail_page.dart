@@ -19,9 +19,7 @@ class BookDetailPage extends StatelessWidget {
     final status = state.statusFor(book);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(book.title),
-      ),
+      appBar: AppBar(title: Text(book.title)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -45,30 +43,34 @@ class BookDetailPage extends StatelessWidget {
                     Text(
                       book.title,
                       style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       book.author,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black87,
-                    ),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.star,
-                            size: 18, color: Colors.black87),
+                        const Icon(Icons.star, size: 18, color: Colors.black87),
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
                             '${book.rating.toStringAsFixed(1)} (${book.ratingCount})',
-                            style: const TextStyle(fontSize: 13, color: Colors.black87),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Colors.black87,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -77,16 +79,16 @@ class BookDetailPage extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       '${book.genre} • ${book.pages} pages',
-                      style: const TextStyle(fontSize: 13, color: Colors.black87),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.black87,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 12),
                     // Button to add/change book's shelf status
-                    _ShelfButton(
-                      book: book,
-                      currentStatus: status,
-                    ),
+                    _ShelfButton(book: book, currentStatus: status),
                   ],
                 ),
               ),
@@ -98,10 +100,7 @@ class BookDetailPage extends StatelessWidget {
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Summary coming soon.',
-            style: TextStyle(fontSize: 14),
-          ),
+          const Text('Summary coming soon.', style: TextStyle(fontSize: 14)),
           if (book.isCommitteePick || book.isRequired)
             Padding(
               padding: const EdgeInsets.only(top: 16),
@@ -112,7 +111,11 @@ class BookDetailPage extends StatelessWidget {
                   if (book.isCommitteePick)
                     Chip(
                       label: const Text('Committee Pick'),
-                      avatar: const Icon(Icons.star, size: 18, color: Colors.black),
+                      avatar: const Icon(
+                        Icons.star,
+                        size: 18,
+                        color: Colors.black,
+                      ),
                       backgroundColor: Colors.white,
                       side: const BorderSide(color: Colors.black, width: 1),
                       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -120,7 +123,11 @@ class BookDetailPage extends StatelessWidget {
                   if (book.isRequired)
                     Chip(
                       label: const Text('Required Reading'),
-                      avatar: const Icon(Icons.assignment, size: 18, color: Colors.black),
+                      avatar: const Icon(
+                        Icons.assignment,
+                        size: 18,
+                        color: Colors.black,
+                      ),
                       backgroundColor: Colors.white,
                       side: const BorderSide(color: Colors.black, width: 1),
                       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -140,10 +147,7 @@ class _ShelfButton extends StatelessWidget {
   final Book book;
   final ShelfStatus? currentStatus;
 
-  const _ShelfButton({
-    required this.book,
-    required this.currentStatus,
-  });
+  const _ShelfButton({required this.book, required this.currentStatus});
 
   @override
   Widget build(BuildContext context) {
@@ -194,9 +198,16 @@ class _ShelfButton extends StatelessWidget {
               value: null,
               child: Row(
                 children: [
-                  Icon(Icons.remove_circle_outline, size: 20, color: Colors.grey.shade700),
+                  Icon(
+                    Icons.remove_circle_outline,
+                    size: 20,
+                    color: Colors.grey.shade700,
+                  ),
                   const SizedBox(width: 12),
-                  Text('Remove from shelf', style: TextStyle(color: Colors.grey.shade700)),
+                  Text(
+                    'Remove from shelf',
+                    style: TextStyle(color: Colors.grey.shade700),
+                  ),
                 ],
               ),
             ),
@@ -204,6 +215,7 @@ class _ShelfButton extends StatelessWidget {
         );
 
         // Update book status if user made a selection
+        if (!context.mounted) return;
         if (newStatus != null || (newStatus == null && currentStatus != null)) {
           HapticFeedback.mediumImpact();
           // Update state and notify listeners to rebuild UI
@@ -214,10 +226,10 @@ class _ShelfButton extends StatelessWidget {
         currentStatus == null
             ? Icons.add
             : currentStatus == ShelfStatus.wantToRead
-                ? Icons.bookmark
-                : currentStatus == ShelfStatus.reading
-                    ? Icons.menu_book
-                    : Icons.check_circle,
+            ? Icons.bookmark
+            : currentStatus == ShelfStatus.reading
+            ? Icons.menu_book
+            : Icons.check_circle,
       ),
       label: Text(currentStatus?.label ?? 'Add to shelf'),
       style: ElevatedButton.styleFrom(
@@ -231,4 +243,3 @@ class _ShelfButton extends StatelessWidget {
     );
   }
 }
-

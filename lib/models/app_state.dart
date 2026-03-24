@@ -2,6 +2,131 @@ import 'package:flutter/foundation.dart';
 import 'book.dart';
 import '../services/book_service.dart';
 
+/// Sample books for demonstration when Firestore is empty
+/// These books have ISBNs for working cover art from Open Library
+final List<Book> _sampleBooks = [
+  Book(
+    id: 1,
+    title: 'The Hobbit',
+    author: 'J.R.R. Tolkien',
+    genre: 'Fantasy',
+    pages: 310,
+    rating: 4.8,
+    ratingCount: 2500000,
+    isCommitteePick: true,
+    isRequired: false,
+    isbn: '9780547928227',
+  ),
+  Book(
+    id: 2,
+    title: 'To Kill a Mockingbird',
+    author: 'Harper Lee',
+    genre: 'Fiction',
+    pages: 281,
+    rating: 4.7,
+    ratingCount: 5000000,
+    isCommitteePick: true,
+    isRequired: true,
+    isbn: '9780061120084',
+  ),
+  Book(
+    id: 3,
+    title: '1984',
+    author: 'George Orwell',
+    genre: 'Dystopian',
+    pages: 328,
+    rating: 4.6,
+    ratingCount: 3000000,
+    isCommitteePick: false,
+    isRequired: true,
+    isbn: '9780451524935',
+  ),
+  Book(
+    id: 4,
+    title: 'Pride and Prejudice',
+    author: 'Jane Austen',
+    genre: 'Romance',
+    pages: 279,
+    rating: 4.5,
+    ratingCount: 2000000,
+    isCommitteePick: false,
+    isRequired: false,
+    isbn: '9780141439518',
+  ),
+  Book(
+    id: 5,
+    title: 'The Great Gatsby',
+    author: 'F. Scott Fitzgerald',
+    genre: 'Classic',
+    pages: 180,
+    rating: 4.4,
+    ratingCount: 3500000,
+    isCommitteePick: true,
+    isRequired: true,
+    isbn: '9780743273565',
+  ),
+  Book(
+    id: 6,
+    title: 'Harry Potter and the Sorcerer\'s Stone',
+    author: 'J.K. Rowling',
+    genre: 'Fantasy',
+    pages: 309,
+    rating: 4.9,
+    ratingCount: 6000000,
+    isCommitteePick: true,
+    isRequired: false,
+    isbn: '9780590353427',
+  ),
+  Book(
+    id: 7,
+    title: 'The Catcher in the Rye',
+    author: 'J.D. Salinger',
+    genre: 'Fiction',
+    pages: 234,
+    rating: 4.1,
+    ratingCount: 1500000,
+    isCommitteePick: false,
+    isRequired: false,
+    isbn: '9780316769488',
+  ),
+  Book(
+    id: 8,
+    title: 'Lord of the Flies',
+    author: 'William Golding',
+    genre: 'Classic',
+    pages: 224,
+    rating: 4.0,
+    ratingCount: 1800000,
+    isCommitteePick: false,
+    isRequired: true,
+    isbn: '9780399501487',
+  ),
+  Book(
+    id: 9,
+    title: 'Brave New World',
+    author: 'Aldous Huxley',
+    genre: 'Dystopian',
+    pages: 268,
+    rating: 4.3,
+    ratingCount: 1200000,
+    isCommitteePick: false,
+    isRequired: false,
+    isbn: '9780060850524',
+  ),
+  Book(
+    id: 10,
+    title: 'The Hunger Games',
+    author: 'Suzanne Collins',
+    genre: 'Sci-Fi',
+    pages: 374,
+    rating: 4.7,
+    ratingCount: 4000000,
+    isCommitteePick: true,
+    isRequired: false,
+    isbn: '9780439023481',
+  ),
+];
+
 /// Central state management for the app
 /// Manages book collection and user's reading shelves (Want to Read, Reading, Finished)
 class AppState extends ChangeNotifier {
@@ -45,9 +170,7 @@ class AppState extends ChangeNotifier {
 
   // Helper method to filter books by shelf status, sorted alphabetically
   List<Book> _booksWithStatus(ShelfStatus status) {
-    return _allBooks
-        .where((b) => _userShelves[b.key] == status)
-        .toList()
+    return _allBooks.where((b) => _userShelves[b.key] == status).toList()
       ..sort((a, b) => a.title.compareTo(b.title));
   }
 
@@ -94,13 +217,13 @@ class AppState extends ChangeNotifier {
     if (finishedBooks.isEmpty) return trendingBooks;
     finishedBooks.sort((a, b) => b.id.compareTo(a.id));
     final lastFinished = finishedBooks.first;
-    return booksByGenre(lastFinished.genre)
-        .where((b) => b.key != lastFinished.key)
-        .take(10)
-        .toList();
+    return booksByGenre(
+      lastFinished.genre,
+    ).where((b) => b.key != lastFinished.key).take(10).toList();
   }
 
   /// Load books from Firebase Firestore
+  /// Falls back to sample books if Firestore is empty or fails
   Future<void> _loadBooksFromFirebase() async {
     _isLoading = true;
     _error = null;
@@ -109,12 +232,18 @@ class AppState extends ChangeNotifier {
     try {
       final books = await _bookService.getAllBooksOnce();
       _allBooks.clear();
-      _allBooks.addAll(books);
+      if (books.isEmpty) {
+        // Use sample books when Firestore is empty
+        _allBooks.addAll(_sampleBooks);
+      } else {
+        _allBooks.addAll(books);
+      }
       _error = null;
     } catch (e) {
       _error = 'Failed to load books: $e';
-      // Show empty state if Firebase fails
+      // Fall back to sample books when Firebase fails
       _allBooks.clear();
+      _allBooks.addAll(_sampleBooks);
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -175,4 +304,3 @@ class AppState extends ChangeNotifier {
     return maxId + 1;
   }
 }
-

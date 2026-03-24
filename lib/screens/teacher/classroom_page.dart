@@ -55,9 +55,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
     final service = TeacherClassService();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.className),
-      ),
+      appBar: AppBar(title: Text(widget.className)),
       body: Column(
         children: [
           // Students header + search
@@ -97,9 +95,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
 
                 final docs = snapshot.data?.docs ?? [];
                 if (docs.isEmpty) {
-                  return const Center(
-                    child: Text('No students added yet.'),
-                  );
+                  return const Center(child: Text('No students added yet.'));
                 }
 
                 final query = _searchController.text.trim().toLowerCase();
@@ -107,8 +103,8 @@ class _ClassroomPageState extends State<ClassroomPage> {
                 final filtered = docs.where((d) {
                   final data = d.data() as Map<String, dynamic>;
                   final email = (data['email'] as String? ?? '').toLowerCase();
-                  final name =
-                      (data['displayName'] as String? ?? '').toLowerCase();
+                  final name = (data['displayName'] as String? ?? '')
+                      .toLowerCase();
                   if (query.isEmpty) return true;
                   return email.contains(query) || name.contains(query);
                 }).toList();
@@ -119,8 +115,8 @@ class _ClassroomPageState extends State<ClassroomPage> {
                   itemBuilder: (context, index) {
                     final doc = filtered[index];
                     final data = doc.data() as Map<String, dynamic>;
-                    final displayName =
-                        (data['displayName'] as String?)?.trim();
+                    final displayName = (data['displayName'] as String?)
+                        ?.trim();
                     final email = (data['email'] as String?)?.trim() ?? '';
 
                     return Card(
@@ -130,13 +126,16 @@ class _ClassroomPageState extends State<ClassroomPage> {
                           (displayName != null && displayName.isNotEmpty)
                               ? displayName
                               : email.isNotEmpty
-                                  ? email
-                                  : doc.id,
+                              ? email
+                              : doc.id,
                         ),
                         subtitle: email.isNotEmpty ? Text(email) : null,
                         trailing: IconButton(
                           icon: const Icon(Icons.remove_circle_outline),
                           onPressed: () async {
+                            final scaffoldMessenger = ScaffoldMessenger.of(
+                              context,
+                            );
                             try {
                               await service.removeStudentFromClass(
                                 classId: widget.classId,
@@ -144,15 +143,15 @@ class _ClassroomPageState extends State<ClassroomPage> {
                                 studentUserId: doc.id,
                               );
                               if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Student removed')),
+                              scaffoldMessenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text('Student removed'),
+                                ),
                               );
                             } catch (e) {
                               if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Failed to remove: $e'),
-                                ),
+                              scaffoldMessenger.showSnackBar(
+                                SnackBar(content: Text('Failed to remove: $e')),
                               );
                             }
                           },

@@ -24,14 +24,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Consumer<AuthState>(
       builder: (context, auth, _) {
-        // Debug: Print role information
-        print('🔍 DEBUG: User role = ${auth.userRole}');
-        print('🔍 DEBUG: isTeacher = ${auth.isTeacher}');
-        print('🔍 DEBUG: isAdmin = ${auth.isAdmin}');
-        print(
-          '🔍 DEBUG: Should show Classes = ${auth.isTeacher || auth.isAdmin}',
-        );
-
         // Build pages and destinations dynamically based on user role
         final pages = <Widget>[
           const ExplorePage(),

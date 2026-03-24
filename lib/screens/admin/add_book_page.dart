@@ -46,93 +46,22 @@ class _AddBookPageState extends State<AddBookPage> {
       if (!mounted) return;
       setState(() => _searchError = e.toString());
     } finally {
-      if (!mounted) return;
-      setState(() => _searching = false);
+      if (mounted) {
+        setState(() => _searching = false);
+      }
     }
   }
 
   Future<void> _openManualAdd({BookSearchResult? prefill}) async {
     await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => AddBookManualPage(prefill: prefill),
-      ),
+      MaterialPageRoute(builder: (_) => AddBookManualPage(prefill: prefill)),
     );
-  }
-
-  final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _authorController = TextEditingController();
-  final _genreController = TextEditingController();
-  final _pagesController = TextEditingController();
-  final _ratingController = TextEditingController();
-  final _ratingCountController = TextEditingController();
-  final _isbnController = TextEditingController();
-  
-  bool _isCommitteePick = false;
-  bool _isRequired = false;
-  bool _isLoading = false;
-
-  Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final appState = context.read<AppState>();
-      final book = Book(
-        id: appState.getNextBookId(),
-        title: _titleController.text.trim(),
-        author: _authorController.text.trim(),
-        genre: _genreController.text.trim(),
-        pages: int.parse(_pagesController.text),
-        rating: double.parse(_ratingController.text),
-        ratingCount: int.parse(_ratingCountController.text),
-        isCommitteePick: _isCommitteePick,
-        isRequired: _isRequired,
-        isbn: _isbnController.text.trim().isEmpty 
-            ? null 
-            : _isbnController.text.trim(),
-      );
-
-      await appState.addBook(book);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Book added successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.of(context).pop();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to add book: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Book'),
-      ),
+      appBar: AppBar(title: const Text('Add Book')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -142,7 +71,7 @@ class _AddBookPageState extends State<AddBookPage> {
             onSubmitted: (_) => _runSearch(),
             decoration: InputDecoration(
               labelText: 'Search books',
-              hintText: 'Try: “The Hobbit” or “9780547928227”',
+              hintText: 'Try: "The Hobbit" or "9780547928227"',
               border: const OutlineInputBorder(),
               suffixIcon: IconButton(
                 tooltip: 'Search',
@@ -169,10 +98,7 @@ class _AddBookPageState extends State<AddBookPage> {
           ),
           if (_searchError != null) ...[
             const SizedBox(height: 8),
-            Text(
-              _searchError!,
-              style: TextStyle(color: Colors.red.shade700),
-            ),
+            Text(_searchError!, style: TextStyle(color: Colors.red.shade700)),
           ],
           const SizedBox(height: 8),
           if (_results.isEmpty && !_searching)
@@ -258,7 +184,9 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
         ratingCount: int.parse(_ratingCountController.text),
         isCommitteePick: _isCommitteePick,
         isRequired: _isRequired,
-        isbn: _isbnController.text.trim().isEmpty ? null : _isbnController.text.trim(),
+        isbn: _isbnController.text.trim().isEmpty
+            ? null
+            : _isbnController.text.trim(),
       );
 
       await appState.addBook(book);
@@ -279,8 +207,9 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
         ),
       );
     } finally {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -288,7 +217,9 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.prefill == null ? 'Add Book Manually' : 'Confirm & Add'),
+        title: Text(
+          widget.prefill == null ? 'Add Book Manually' : 'Confirm & Add',
+        ),
       ),
       body: Form(
         key: _formKey,
@@ -301,8 +232,9 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
                 labelText: 'Title *',
                 border: OutlineInputBorder(),
               ),
-              validator: (value) =>
-                  (value == null || value.trim().isEmpty) ? 'Please enter a title' : null,
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? 'Please enter a title'
+                  : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -311,8 +243,9 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
                 labelText: 'Author *',
                 border: OutlineInputBorder(),
               ),
-              validator: (value) =>
-                  (value == null || value.trim().isEmpty) ? 'Please enter an author' : null,
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? 'Please enter an author'
+                  : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -321,8 +254,9 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
                 labelText: 'Genre *',
                 border: OutlineInputBorder(),
               ),
-              validator: (value) =>
-                  (value == null || value.trim().isEmpty) ? 'Please enter a genre' : null,
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? 'Please enter a genre'
+                  : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -350,11 +284,15 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
                       border: OutlineInputBorder(),
                       hintText: '0.0 - 5.0',
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     validator: (value) {
                       if (value == null || value.isEmpty) return null;
                       final rating = double.tryParse(value);
-                      if (rating == null || rating < 0 || rating > 5) return '0.0 - 5.0';
+                      if (rating == null || rating < 0 || rating > 5) {
+                        return '0.0 - 5.0';
+                      }
                       return null;
                     },
                   ),
@@ -391,12 +329,14 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
             CheckboxListTile(
               title: const Text('Committee Pick'),
               value: _isCommitteePick,
-              onChanged: (value) => setState(() => _isCommitteePick = value ?? false),
+              onChanged: (value) =>
+                  setState(() => _isCommitteePick = value ?? false),
             ),
             CheckboxListTile(
               title: const Text('Required Reading'),
               value: _isRequired,
-              onChanged: (value) => setState(() => _isRequired = value ?? false),
+              onChanged: (value) =>
+                  setState(() => _isRequired = value ?? false),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
@@ -418,4 +358,3 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
     );
   }
 }
-

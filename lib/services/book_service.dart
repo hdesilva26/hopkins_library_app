@@ -8,17 +8,15 @@ class BookService {
   final String _collectionName = 'books';
 
   /// Get all books from Firestore
-  /// Returns a Stream that emits List<Book> whenever the collection changes
+  /// Returns a Stream that emits List of Book whenever the collection changes
   Stream<List<Book>> getAllBooks() {
     return _firestore
         .collection(_collectionName)
         .orderBy('title')
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => Book.fromMap(doc.data()))
-          .toList();
-    });
+          return snapshot.docs.map((doc) => Book.fromMap(doc.data())).toList();
+        });
   }
 
   /// Get all books once (non-streaming)
@@ -28,10 +26,8 @@ class BookService {
         .collection(_collectionName)
         .orderBy('title')
         .get();
-    
-    return snapshot.docs
-        .map((doc) => Book.fromMap(doc.data()))
-        .toList();
+
+    return snapshot.docs.map((doc) => Book.fromMap(doc.data())).toList();
   }
 
   /// Add a new book to Firestore
@@ -65,7 +61,7 @@ class BookService {
         .collection(_collectionName)
         .doc(bookId.toString())
         .get();
-    
+
     if (doc.exists) {
       return Book.fromMap(doc.data()!);
     }
@@ -76,15 +72,14 @@ class BookService {
   /// This is more efficient than adding books one by one
   Future<void> batchAddBooks(List<Book> books) async {
     final batch = _firestore.batch();
-    
+
     for (final book in books) {
       final docRef = _firestore
           .collection(_collectionName)
           .doc(book.id.toString());
       batch.set(docRef, book.toMap());
     }
-    
+
     await batch.commit();
   }
 }
-

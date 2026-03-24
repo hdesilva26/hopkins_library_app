@@ -21,8 +21,8 @@ class BookSearchResult {
     final parts = <String>[];
     if (author.isNotEmpty) parts.add(author);
     if (firstPublishYear != null) parts.add(firstPublishYear.toString());
-    if (pageCount != null) parts.add('${pageCount} pages');
-    if (isbn != null && isbn!.isNotEmpty) parts.add('ISBN ${isbn!}');
+    if (pageCount != null) parts.add('$pageCount pages');
+    if (isbn != null && isbn!.isNotEmpty) parts.add('ISBN $isbn');
     return parts.join(' • ');
   }
 }
@@ -36,10 +36,9 @@ class BookSearchService {
     final q = query.trim();
     if (q.isEmpty) return [];
 
-    final uri = Uri.parse('$_base/search.json').replace(queryParameters: {
-      'q': q,
-      'limit': '20',
-    });
+    final uri = Uri.parse(
+      '$_base/search.json',
+    ).replace(queryParameters: {'q': q, 'limit': '20'});
 
     final res = await http.get(uri);
     if (res.statusCode != 200) {
@@ -54,7 +53,8 @@ class BookSearchService {
       final title = (doc['title'] as String?)?.trim() ?? '';
       if (title.isEmpty) return null;
 
-      final authors = (doc['author_name'] as List<dynamic>?)
+      final authors =
+          (doc['author_name'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           const [];
@@ -62,9 +62,8 @@ class BookSearchService {
 
       final year = (doc['first_publish_year'] as int?);
       final pages = (doc['number_of_pages_median'] as int?);
-      final isbns = (doc['isbn'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
+      final isbns =
+          (doc['isbn'] as List<dynamic>?)?.map((e) => e.toString()).toList() ??
           const [];
       final isbn = isbns.isNotEmpty ? isbns.first : null;
 
@@ -85,5 +84,3 @@ class BookSearchService {
     return results;
   }
 }
-
-
