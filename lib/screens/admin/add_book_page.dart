@@ -4,11 +4,6 @@ import '../../models/app_state.dart';
 import '../../models/book.dart';
 import '../../services/book_search_service.dart';
 
-/// Admin page for adding new books to the library
-/// Search-first flow:
-/// - Search Open Library
-/// - Tap a result to prefill a manual form
-/// - Or tap "Can't find it?" to add manually
 class AddBookPage extends StatefulWidget {
   const AddBookPage({super.key});
 
@@ -121,7 +116,6 @@ class _AddBookPageState extends State<AddBookPage> {
   }
 }
 
-/// Manual form used when a book is not found (or to confirm/edit search result fields).
 class AddBookManualPage extends StatefulWidget {
   final BookSearchResult? prefill;
   const AddBookManualPage({super.key, this.prefill});
@@ -136,11 +130,8 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
   final _authorController = TextEditingController();
   final _genreController = TextEditingController();
   final _pagesController = TextEditingController();
-  final _ratingController = TextEditingController(text: '0');
-  final _ratingCountController = TextEditingController(text: '0');
   final _isbnController = TextEditingController();
 
-  bool _isCommitteePick = false;
   bool _isRequired = false;
   bool _isLoading = false;
 
@@ -162,8 +153,6 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
     _authorController.dispose();
     _genreController.dispose();
     _pagesController.dispose();
-    _ratingController.dispose();
-    _ratingCountController.dispose();
     _isbnController.dispose();
     super.dispose();
   }
@@ -180,9 +169,6 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
         author: _authorController.text.trim(),
         genre: _genreController.text.trim(),
         pages: int.parse(_pagesController.text),
-        rating: double.parse(_ratingController.text),
-        ratingCount: int.parse(_ratingCountController.text),
-        isCommitteePick: _isCommitteePick,
         isRequired: _isRequired,
         isbn: _isbnController.text.trim().isEmpty
             ? null
@@ -274,49 +260,6 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
               },
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _ratingController,
-                    decoration: const InputDecoration(
-                      labelText: 'Rating',
-                      border: OutlineInputBorder(),
-                      hintText: '0.0 - 5.0',
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) return null;
-                      final rating = double.tryParse(value);
-                      if (rating == null || rating < 0 || rating > 5) {
-                        return '0.0 - 5.0';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    controller: _ratingCountController,
-                    decoration: const InputDecoration(
-                      labelText: 'Rating Count',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) return null;
-                      final count = int.tryParse(value);
-                      if (count == null || count < 0) return 'Invalid number';
-                      return null;
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
             TextFormField(
               controller: _isbnController,
               decoration: const InputDecoration(
@@ -326,12 +269,6 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
-            CheckboxListTile(
-              title: const Text('Committee Pick'),
-              value: _isCommitteePick,
-              onChanged: (value) =>
-                  setState(() => _isCommitteePick = value ?? false),
-            ),
             CheckboxListTile(
               title: const Text('Required Reading'),
               value: _isRequired,

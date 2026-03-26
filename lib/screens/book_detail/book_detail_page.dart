@@ -60,23 +60,6 @@ class BookDetailPage extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(Icons.star, size: 18, color: Colors.black87),
-                        const SizedBox(width: 4),
-                        Flexible(
-                          child: Text(
-                            '${book.rating.toStringAsFixed(1)} (${book.ratingCount})',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Colors.black87,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
                     Text(
                       '${book.genre} • ${book.pages} pages',
                       style: const TextStyle(
@@ -101,25 +84,13 @@ class BookDetailPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text('Summary coming soon.', style: TextStyle(fontSize: 14)),
-          if (book.isCommitteePick || book.isRequired)
+          if (book.isRequired)
             Padding(
               padding: const EdgeInsets.only(top: 16),
               child: Wrap(
                 spacing: 12,
                 runSpacing: 8,
                 children: [
-                  if (book.isCommitteePick)
-                    Chip(
-                      label: const Text('Committee Pick'),
-                      avatar: const Icon(
-                        Icons.star,
-                        size: 18,
-                        color: Colors.black,
-                      ),
-                      backgroundColor: Colors.white,
-                      side: const BorderSide(color: Colors.black, width: 1),
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                    ),
                   if (book.isRequired)
                     Chip(
                       label: const Text('Required Reading'),

@@ -108,35 +108,6 @@ class _BookCardState extends State<BookCard>
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontSize: 9, color: Colors.grey.shade700),
                 ),
-                const SizedBox(height: 3),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.star, size: 10, color: Colors.grey.shade700),
-                    const SizedBox(width: 2),
-                    Flexible(
-                      child: Text(
-                        widget.book.rating.toStringAsFixed(1),
-                        style: const TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 2),
-                    Flexible(
-                      child: Text(
-                        '(${widget.book.ratingCount})',
-                        style: TextStyle(
-                          fontSize: 8,
-                          color: Colors.grey.shade600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),

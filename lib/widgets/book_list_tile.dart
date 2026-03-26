@@ -24,49 +24,28 @@ class BookListTile extends StatelessWidget {
       elevation: 1,
       child: ListTile(
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => BookDetailPage(book: book),
-            ),
-          );
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => BookDetailPage(book: book)));
         },
-        leading: BookCoverImage(
-          book: book,
-          width: 40,
-          height: 60,
-          size: 'S',
-        ),
-        title: Text(
-          book.title,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
+        leading: BookCoverImage(book: book, width: 40, height: 60, size: 'S'),
+        title: Text(book.title, maxLines: 2, overflow: TextOverflow.ellipsis),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(book.author, maxLines: 1, overflow: TextOverflow.ellipsis),
             Text(
-              book.author,
-              maxLines: 1,
+              book.genre,
+              style: const TextStyle(fontSize: 12),
               overflow: TextOverflow.ellipsis,
-            ),
-            Row(
-              children: [
-                Icon(Icons.star, size: 14, color: Colors.grey.shade700),
-                const SizedBox(width: 2),
-                Flexible(
-                  child: Text(
-                    '${book.rating.toStringAsFixed(1)} • ${book.genre}',
-                    style: const TextStyle(fontSize: 12),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
             ),
             if (status != null)
               Text(
                 status.label,
                 style: const TextStyle(
-                    fontSize: 11, fontStyle: FontStyle.italic),
+                  fontSize: 11,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
           ],
         ),
@@ -91,9 +70,7 @@ class _ShelfMenu extends StatelessWidget {
 
     return PopupMenuButton<ShelfStatus?>(
       initialValue: status,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onSelected: (value) {
         HapticFeedback.lightImpact();
         context.read<AppState>().setStatus(book, value);
@@ -134,7 +111,11 @@ class _ShelfMenu extends StatelessWidget {
           value: null,
           child: Row(
             children: [
-              Icon(Icons.remove_circle_outline, size: 20, color: Colors.grey.shade700),
+              Icon(
+                Icons.remove_circle_outline,
+                size: 20,
+                color: Colors.grey.shade700,
+              ),
               const SizedBox(width: 12),
               Text('Remove', style: TextStyle(color: Colors.grey.shade700)),
             ],
@@ -148,4 +129,3 @@ class _ShelfMenu extends StatelessWidget {
     );
   }
 }
-
