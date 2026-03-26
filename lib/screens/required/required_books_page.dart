@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import '../../models/class_model.dart';
 import '../../models/book.dart';
 import '../../services/class_service.dart';
+import '../../services/auth_state.dart';
+import '../../services/book_service.dart';
 import '../../widgets/book_list_tile.dart';
 
 class RequiredBooksPage extends StatefulWidget {
@@ -14,11 +16,14 @@ class RequiredBooksPage extends StatefulWidget {
 
 class _RequiredBooksPageState extends State<RequiredBooksPage> {
   final ClassService _classService = ClassService();
+  final BookService _bookService = BookService();
   String _searchQuery = '';
   ClassModel? _selectedClass;
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthState>();
+
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
@@ -181,6 +186,7 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
                     return _ClassCard(
                       classModel: classModel,
                       isExpanded: _selectedClass?.id == classModel.id,
+                      isAdmin: auth.isAdmin,
                       onTap: () {
                         setState(() {
                           if (_selectedClass?.id == classModel.id) {
@@ -190,10 +196,143 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
                           }
                         });
                       },
+                      onAddBook: () => _showAddBookDialog(context, classModel),
                     );
                   }, childCount: filteredClasses.length),
                 );
               },
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: context.watch<AuthState>().isAdmin
+          ? FloatingActionButton(
+              onPressed: () => _showCreateClassDialog(context),
+              child: const Icon(Icons.add),
+            )
+          : null,
+    );
+  }
+
+  Future<void> _showCreateClassDialog(BuildContext context) async {
+    final nameController = TextEditingController();
+    final subjectController = TextEditingController();
+
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Create Class'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Class Name',
+                hintText: 'e.g., AP English Literature',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: subjectController,
+              decoration: const InputDecoration(
+                labelText: 'Subject (optional)',
+                hintText: 'e.g., English',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final name = nameController.text.trim();
+              if (name.isNotEmpty) {
+                await _classService.createClass(
+                  name,
+                  subject: subjectController.text.trim().isEmpty
+                      ? null
+                      : subjectController.text.trim(),
+                );
+                if (context.mounted) Navigator.pop(context);
+              }
+            },
+            child: const Text('Create'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showAddBookDialog(
+    BuildContext context,
+    ClassModel classModel,
+  ) async {
+    final books = await _bookService.getAllBooksOnce();
+
+    if (!context.mounted) return;
+    if (books.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No books available in library')),
+      );
+      return;
+    }
+
+    final existingBookIds = classModel.requiredBooks.map((b) => b.id).toSet();
+    final availableBooks = books
+        .where((b) => !existingBookIds.contains(b.id))
+        .toList();
+
+    Book? selectedBook;
+
+    return showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text('Add Book to ${classModel.name}'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: availableBooks.isEmpty
+                ? const Text('All books already added to this class')
+                : ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: availableBooks.length,
+                    itemBuilder: (context, index) {
+                      final book = availableBooks[index];
+                      final isSelected = selectedBook?.id == book.id;
+                      return ListTile(
+                        leading: isSelected
+                            ? const Icon(Icons.check_circle)
+                            : const Icon(Icons.book),
+                        title: Text(book.title),
+                        subtitle: Text(book.author),
+                        selected: isSelected,
+                        onTap: () {
+                          setDialogState(() => selectedBook = book);
+                        },
+                      );
+                    },
+                  ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: selectedBook == null
+                  ? null
+                  : () async {
+                      await _classService.addRequiredBook(
+                        classModel.id,
+                        selectedBook!,
+                      );
+                      if (dialogContext.mounted) Navigator.pop(dialogContext);
+                    },
+              child: const Text('Add'),
             ),
           ],
         ),
@@ -205,12 +344,16 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
 class _ClassCard extends StatelessWidget {
   final ClassModel classModel;
   final bool isExpanded;
+  final bool isAdmin;
   final VoidCallback onTap;
+  final VoidCallback onAddBook;
 
   const _ClassCard({
     required this.classModel,
     required this.isExpanded,
+    required this.isAdmin,
     required this.onTap,
+    required this.onAddBook,
   });
 
   @override
@@ -271,6 +414,17 @@ class _ClassCard extends StatelessWidget {
               ...classModel.requiredBooks.map(
                 (book) => BookListTile(book: book),
               ),
+            if (isAdmin) ...[
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: OutlinedButton.icon(
+                  onPressed: onAddBook,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Book to Class'),
+                ),
+              ),
+            ],
           ],
         ],
       ),
