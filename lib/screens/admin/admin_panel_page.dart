@@ -6,15 +6,12 @@ import '../../services/auth_state.dart';
 import '../../services/user_service.dart';
 
 /// Admin panel for managing user roles
-/// Allows admins to change users between student / teacher / admin
+/// Allows admins to change users between student / admin
 class AdminPanelPage extends StatelessWidget {
   const AdminPanelPage({super.key});
 
-  // If your UserService doesn't have roleTeacher yet, add it there.
-  // Keeping them here as a fallback is also fine.
   static const List<String> _roles = <String>[
     UserService.roleStudent,
-    UserService.roleTeacher,
     UserService.roleAdmin,
   ];
 
@@ -147,8 +144,6 @@ class AdminPanelPage extends StatelessWidget {
     switch (role) {
       case UserService.roleAdmin:
         return 'Admin';
-      case UserService.roleTeacher:
-        return 'Teacher';
       case UserService.roleStudent:
       default:
         return 'Student';

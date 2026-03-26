@@ -10,7 +10,7 @@ import 'user_service.dart';
 
 /// Authentication state management
 /// Handles Google Sign-In with domain restriction to Hopkins.edu accounts
-/// Manages user roles (student/teacher/admin) LIVE from Firestore
+/// Manages user roles (student/admin) LIVE from Firestore
 class AuthState extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final UserService _userService = UserService();
@@ -67,16 +67,31 @@ class AuthState extends ChangeNotifier {
 
   Future<void> _ensureUserDocAndInitialRole(User user) async {
     try {
-      // This creates the doc as student if missing
-      _userRole = await _userService.getUserRole(user.uid);
+      // Fetch current profile to see if it exists
+      final profile = await _userService.getUserProfile(user.uid);
+      
+      if (profile == null) {
+        // Document doesn't exist. Create it with ALL required fields atomically.
+        await _userService.updateUserProfile(user.uid, {
+          'email': user.email ?? '',
+          'displayName': user.displayName ?? '',
+          'role': UserService.roleStudent,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        _userRole = UserService.roleStudent;
+      } else {
+        // Document exists. Only update mutable profile fields.
+        await _userService.updateUserProfile(user.uid, {
+          'email': user.email ?? '',
+          'displayName': user.displayName ?? '',
+        });
+
+        final rawRole = profile['role'] as String?;
+        final cleanRole = rawRole?.trim().toLowerCase() ?? '';
+        _userRole = cleanRole.isNotEmpty ? cleanRole : UserService.roleStudent;
+      }
+
       _roleLoaded = true;
-
-      // Also store/update profile fields you want
-      await _userService.updateUserProfile(user.uid, {
-        'email': user.email ?? '',
-        'displayName': user.displayName ?? '',
-      });
-
       notifyListeners();
     } catch (e) {
       debugPrint('Error ensuring user doc / role: $e');
@@ -93,18 +108,24 @@ class AuthState extends ChangeNotifier {
         .collection('users')
         .doc(uid)
         .snapshots()
-        .listen((doc) {
-      final data = doc.data();
-      final newRole = (data?['role'] as String?) ?? UserService.roleStudent;
+        .listen(
+          (doc) {
+            final data = doc.data();
+            final rawRole = data?['role'] as String?;
+            final cleanRole = rawRole?.trim().toLowerCase() ?? '';
+            final newRole = cleanRole.isNotEmpty ? cleanRole : UserService.roleStudent;
 
-      if (newRole != _userRole) {
-        _userRole = newRole;
-        _roleLoaded = true;
-        notifyListeners();
-      }
-    }, onError: (e) {
-      debugPrint('User doc listener error: $e');
-    });
+            _roleLoaded = true;
+
+            if (newRole != _userRole) {
+              _userRole = newRole;
+              notifyListeners();
+            }
+          },
+          onError: (e) {
+            debugPrint('User doc listener error: $e');
+          },
+        );
   }
 
   void _stopUserDocListener() {
@@ -142,10 +163,13 @@ class AuthState extends ChangeNotifier {
       }
 
       final domain = emailParts.last.trim();
-      final isValidDomain = domain == 'hopkins.edu' || domain.endsWith('.hopkins.edu');
+      final isValidDomain =
+          domain == 'hopkins.edu' || domain.endsWith('.hopkins.edu');
       if (!isValidDomain) {
         await _googleSignIn.signOut();
-        throw Exception('Please use your Hopkins school Google account. (Domain: $domain)');
+        throw Exception(
+          'Please use your Hopkins school Google account. (Domain: $domain)',
+        );
       }
 
       final googleAuth = await googleUser.authentication;

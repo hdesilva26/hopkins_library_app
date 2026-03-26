@@ -7,22 +7,31 @@ class UserService {
 
   /// User roles
   static const String roleStudent = 'student';
-  static const String roleTeacher = 'teacher'; // ADD THIS
+  static const String roleTeacher = 'teacher';
   static const String roleAdmin = 'admin';
 
   /// Get user role from Firestore
   /// Returns 'student' by default if user doesn't exist or has no role
   Future<String> getUserRole(String userId) async {
     try {
-      final doc =
-          await _firestore.collection(_collectionName).doc(userId).get();
+      final doc = await _firestore
+          .collection(_collectionName)
+          .doc(userId)
+          .get();
 
       if (doc.exists) {
         final role = doc.data()?['role'] as String?;
-        return role ?? roleStudent;
+        final cleanRole = role?.trim().toLowerCase() ?? '';
+        if (cleanRole.isNotEmpty) {
+          return cleanRole;
+        }
+        await _firestore.collection(_collectionName).doc(userId).set({
+          'role': roleStudent,
+          'createdAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+        return roleStudent;
       }
 
-      // If user doesn't exist in Firestore, create them as student
       await _firestore.collection(_collectionName).doc(userId).set({
         'role': roleStudent,
         'createdAt': FieldValue.serverTimestamp(),
@@ -36,7 +45,7 @@ class UserService {
   }
 
   /// Set user role (admin only operation)
-  /// Accepts: student | teacher | admin
+  /// Accepts: student | admin
   Future<void> setUserRole(String userId, String role) async {
     await _firestore.collection(_collectionName).doc(userId).set({
       'role': role,
@@ -50,17 +59,13 @@ class UserService {
     return role == roleAdmin;
   }
 
-  /// Check if user is teacher
-  Future<bool> isTeacher(String userId) async {
-    final role = await getUserRole(userId);
-    return role == roleTeacher;
-  }
-
   /// Get user profile data
   Future<Map<String, dynamic>?> getUserProfile(String userId) async {
     try {
-      final doc =
-          await _firestore.collection(_collectionName).doc(userId).get();
+      final doc = await _firestore
+          .collection(_collectionName)
+          .doc(userId)
+          .get();
       return doc.data();
     } catch (e) {
       return null;
@@ -68,7 +73,10 @@ class UserService {
   }
 
   /// Update user profile
-  Future<void> updateUserProfile(String userId, Map<String, dynamic> data) async {
+  Future<void> updateUserProfile(
+    String userId,
+    Map<String, dynamic> data,
+  ) async {
     await _firestore.collection(_collectionName).doc(userId).set({
       ...data,
       'updatedAt': FieldValue.serverTimestamp(),

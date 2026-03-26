@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../explore/explore_page.dart';
 import '../my_books/my_books_page.dart';
+import '../required/required_books_page.dart';
 import '../groups/groups_page.dart';
 import '../profile/profile_page.dart';
-import '../teacher/teacher_panel_page.dart';
 import '../admin/add_book_page.dart';
 import '../../services/auth_state.dart';
 
 /// Main navigation screen with bottom navigation bar
-/// Dynamically shows Classes tab for teachers/admins
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -28,8 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
         final pages = <Widget>[
           const ExplorePage(),
           const MyBooksPage(),
-          // Insert Classes page for teachers/admins between My Books and Groups
-          if (auth.isTeacher || auth.isAdmin) const TeacherPanelPage(),
+          const RequiredBooksPage(),
           const GroupsPage(),
           const ProfilePage(),
         ];
@@ -45,13 +43,11 @@ class _HomeScreenState extends State<HomeScreen> {
             selectedIcon: Icon(Icons.menu_book),
             label: 'My Books',
           ),
-          // Insert Classes destination for teachers/admins
-          if (auth.isTeacher || auth.isAdmin)
-            const NavigationDestination(
-              icon: Icon(Icons.school_outlined),
-              selectedIcon: Icon(Icons.school),
-              label: 'Classes',
-            ),
+          const NavigationDestination(
+            icon: Icon(Icons.school_outlined),
+            selectedIcon: Icon(Icons.school),
+            label: 'Required',
+          ),
           const NavigationDestination(
             icon: Icon(Icons.group_outlined),
             selectedIcon: Icon(Icons.group),
@@ -67,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
         final titles = <String>[
           'Explore',
           'My Books',
-          if (auth.isTeacher || auth.isAdmin) 'Classes',
+          'Required',
           'Groups',
           'Profile',
         ];
