@@ -142,13 +142,26 @@ class BookDetailPage extends StatelessWidget {
           ],
           const SizedBox(height: 32),
           Center(
-            child: Text(
-              '* All book info acquired from Open Library',
-              style: TextStyle(
-                fontSize: 11,
-                color: Colors.grey.shade500,
-                fontStyle: FontStyle.italic,
-              ),
+            child: Column(
+              children: [
+                Text(
+                  '* All book info acquired from Open Library',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey.shade500,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '* Page numbers are a rough estimate',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey.shade500,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

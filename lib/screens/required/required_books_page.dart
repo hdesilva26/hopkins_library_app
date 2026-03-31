@@ -293,63 +293,104 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
         .where((b) => !existingBookIds.contains(b.id))
         .toList();
 
+    if (availableBooks.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('All books already added to this class')),
+      );
+      return;
+    }
+
+    final searchController = TextEditingController();
     Book? selectedBook;
 
     return showDialog(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text(
-            'ADD BOOK TO ${classModel.name.toUpperCase()}',
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-          ),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: availableBooks.isEmpty
-                ? const Text('All books already added to this class')
-                : ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: availableBooks.length,
-                    itemBuilder: (context, index) {
-                      final book = availableBooks[index];
-                      final isSelected = selectedBook?.id == book.id;
-                      return ListTile(
-                        leading: isSelected
-                            ? const Icon(
-                                Icons.check_circle,
-                                color: Colors.black,
-                              )
-                            : const Icon(Icons.book),
-                        title: Text(
-                          book.title,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        subtitle: Text(book.author),
-                        selected: isSelected,
-                        onTap: () => setDialogState(() => selectedBook = book),
-                      );
-                    },
+        builder: (context, setDialogState) {
+          final query = searchController.text.toLowerCase();
+          final filteredBooks = query.isEmpty
+              ? availableBooks
+              : availableBooks
+                    .where(
+                      (b) =>
+                          b.title.toLowerCase().contains(query) ||
+                          b.author.toLowerCase().contains(query),
+                    )
+                    .toList();
+
+          return AlertDialog(
+            title: Text(
+              'ADD BOOK TO ${classModel.name.toUpperCase()}',
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+            ),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: searchController,
+                    decoration: const InputDecoration(
+                      hintText: 'Search books...',
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (_) => setDialogState(() {}),
                   ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('CANCEL'),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: filteredBooks.isEmpty
+                        ? const Center(child: Text('No books found'))
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: filteredBooks.length,
+                            itemBuilder: (context, index) {
+                              final book = filteredBooks[index];
+                              final isSelected = selectedBook?.id == book.id;
+                              return ListTile(
+                                leading: isSelected
+                                    ? const Icon(
+                                        Icons.check_circle,
+                                        color: Colors.black,
+                                      )
+                                    : const Icon(Icons.book),
+                                title: Text(
+                                  book.title,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                subtitle: Text(book.author),
+                                selected: isSelected,
+                                onTap: () =>
+                                    setDialogState(() => selectedBook = book),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
             ),
-            ElevatedButton(
-              onPressed: selectedBook == null
-                  ? null
-                  : () async {
-                      await _classService.addRequiredBook(
-                        classModel.id,
-                        selectedBook!,
-                      );
-                      if (dialogContext.mounted) Navigator.pop(dialogContext);
-                    },
-              child: const Text('ADD'),
-            ),
-          ],
-        ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('CANCEL'),
+              ),
+              ElevatedButton(
+                onPressed: selectedBook == null
+                    ? null
+                    : () async {
+                        await _classService.addRequiredBook(
+                          classModel.id,
+                          selectedBook!,
+                        );
+                        if (dialogContext.mounted) Navigator.pop(dialogContext);
+                      },
+                child: const Text('ADD'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
