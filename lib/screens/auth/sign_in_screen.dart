@@ -3,8 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_state.dart';
 
-/// Sign-in screen for Google authentication
-/// Only allows Hopkins.edu email addresses
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
 
@@ -16,7 +14,6 @@ class _SignInScreenState extends State<SignInScreen> {
   bool _loading = false;
   String? _error;
 
-  /// Handle Google sign-in with error handling and loading states
   Future<void> _handleSignIn() async {
     HapticFeedback.mediumImpact();
     setState(() {
@@ -25,10 +22,8 @@ class _SignInScreenState extends State<SignInScreen> {
     });
 
     try {
-      // Attempt Google sign-in (will validate Hopkins.edu domain)
       await context.read<AuthState>().signInWithGoogle();
     } catch (e) {
-      // Show error message if sign-in fails (e.g., wrong domain)
       HapticFeedback.heavyImpact();
       setState(() {
         _error = e.toString().replaceAll('Exception: ', '');
@@ -40,72 +35,69 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Scaffold(
-      body: Center(
+      backgroundColor: Colors.white,
+      body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const Spacer(flex: 2),
               Container(
-                padding: const EdgeInsets.all(24),
+                width: 80,
+                height: 80,
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer.withValues(alpha: 0.3),
-                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.black, width: 3),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.menu_book_rounded,
-                  size: 64,
-                  color: colorScheme.primary,
+                  size: 40,
+                  color: Colors.black,
                 ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Hopkins Reads',
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Sign in with your Hopkins Google account to track your summer reading.',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.7),
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 32),
-              if (_error != null)
+              Text(
+                'HOPKINS\nREADS',
+                style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                  height: 1.1,
+                  letterSpacing: 4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Your summer reading companion',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: const Color(0xFF666666),
+                  letterSpacing: 0.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const Spacer(flex: 2),
+              if (_error != null) ...[
                 Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade300),
+                    border: Border.all(color: Colors.black, width: 2),
                   ),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.error_outline,
-                        color: Colors.grey.shade700,
+                        color: Colors.black,
                         size: 20,
                       ),
-                      const SizedBox(width: 8),
-                      Flexible(
+                      const SizedBox(width: 12),
+                      Expanded(
                         child: Text(
                           _error!,
-                          style: TextStyle(
-                            color: Colors.grey.shade700,
-                            fontSize: 14,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 13,
                           ),
-                          textAlign: TextAlign.center,
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -113,25 +105,34 @@ class _SignInScreenState extends State<SignInScreen> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 24),
+              ],
               SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
+                height: 52,
+                child: ElevatedButton(
                   onPressed: _loading ? null : _handleSignIn,
-                  icon: _loading
+                  child: _loading
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
                         )
-                      : const Icon(Icons.login),
-                  label: Text(
-                    _loading ? 'Signing in…' : 'Sign in with Hopkins',
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
+                      : const Text('SIGN IN WITH GOOGLE'),
                 ),
               ),
+              const SizedBox(height: 16),
+              Text(
+                'Use your Hopkins email to continue',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: const Color(0xFF888888),
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const Spacer(flex: 1),
             ],
           ),
         ),

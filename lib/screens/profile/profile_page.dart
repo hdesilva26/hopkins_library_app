@@ -5,8 +5,6 @@ import '../../models/app_state.dart';
 import '../../widgets/common_widgets.dart';
 import '../admin/admin_panel_page.dart';
 
-/// User profile page displaying account info and reading statistics
-/// Shows: User avatar, name, email, reading stats, and sign-out button
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
@@ -17,27 +15,35 @@ class ProfilePage extends StatelessWidget {
     final state = context.watch<AppState>();
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (user != null)
+          if (user != null) ...[
             Row(
               children: [
-                CircleAvatar(
-                  radius: 26,
-                  child: Text(
-                    (user.displayName?.isNotEmpty == true
-                            ? user.displayName![0]
-                            : user.email?[0] ?? '?')
-                        .toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    border: Border.all(color: Colors.black, width: 2),
+                  ),
+                  child: Center(
+                    child: Text(
+                      (user.displayName?.isNotEmpty == true
+                              ? user.displayName![0]
+                              : user.email?[0] ?? '?')
+                          .toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,16 +52,19 @@ class ProfilePage extends StatelessWidget {
                         user.displayName ?? 'Hopkins Student',
                         style: const TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.3,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      const SizedBox(height: 2),
                       Text(
                         user.email ?? '',
                         style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey.shade700,
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                          letterSpacing: 0.3,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -65,74 +74,66 @@ class ProfilePage extends StatelessWidget {
                 ),
               ],
             ),
-
-          const SizedBox(height: 16),
-          const Text(
-            'Your Reading Stats',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-
-          const SizedBox(height: 12),
-          // Display reading statistics from user's shelves
-          StatRow(
-            label: 'Finished',
-            value: state.finishedBooks.length.toString(),
-          ),
-          StatRow(
-            label: 'Reading',
-            value: state.readingBooks.length.toString(),
-          ),
-          StatRow(
-            label: 'Want to Read',
-            value: state.wantToReadBooks.length.toString(),
-          ),
-
-          const Spacer(),
-
-          // Admin panel button (only shown for admins)
-          if (auth.isAdmin)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Center(
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const AdminPanelPage()),
-                    );
-                  },
-                  icon: const Icon(Icons.admin_panel_settings),
-                  label: const Text('Admin Panel'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
+            const SizedBox(height: 32),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFFE0E0E0)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'READING STATS',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.5,
+                      color: Colors.black,
                     ),
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  StatRow(
+                    label: 'Finished',
+                    value: state.finishedBooks.length.toString(),
+                  ),
+                  StatRow(
+                    label: 'Currently Reading',
+                    value: state.readingBooks.length.toString(),
+                  ),
+                  StatRow(
+                    label: 'Want to Read',
+                    value: state.wantToReadBooks.length.toString(),
+                  ),
+                ],
               ),
             ),
-
-          Center(
-            child: ElevatedButton.icon(
-              onPressed: () => context.read<AuthState>().signOut(),
-              icon: const Icon(Icons.logout),
-              label: const Text('Sign out'),
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
+          ],
+          const Spacer(),
+          if (auth.isAdmin)
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const AdminPanelPage()),
+                  );
+                },
+                icon: const Icon(Icons.admin_panel_settings, size: 18),
+                label: const Text('ADMIN PANEL'),
               ),
+            ),
+          if (auth.isAdmin) const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: () => context.read<AuthState>().signOut(),
+              child: const Text('SIGN OUT'),
             ),
           ),
+          const SizedBox(height: 20),
         ],
       ),
     );

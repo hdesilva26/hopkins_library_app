@@ -6,8 +6,6 @@ import '../models/app_state.dart';
 import '../screens/book_detail/book_detail_page.dart';
 import 'book_cover_image.dart';
 
-/// List tile widget for displaying books in vertical lists
-/// Shows book cover, title, author, rating, genre, shelf status, and quick shelf menu
 class BookListTile extends StatelessWidget {
   final Book book;
 
@@ -16,61 +14,98 @@ class BookListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    // Get current shelf status to display badge
     final status = state.statusFor(book);
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      elevation: 1,
-      child: ListTile(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+      ),
+      child: InkWell(
         onTap: () {
           Navigator.of(
             context,
           ).push(MaterialPageRoute(builder: (_) => BookDetailPage(book: book)));
         },
-        leading: BookCoverImage(book: book, width: 40, height: 60, size: 'S'),
-        title: Text(book.title, maxLines: 2, overflow: TextOverflow.ellipsis),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(book.author, maxLines: 1, overflow: TextOverflow.ellipsis),
-            Text(
-              book.genre,
-              style: const TextStyle(fontSize: 12),
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (status != null)
-              Text(
-                status.label,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontStyle: FontStyle.italic,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              BookCoverImage(book: book, width: 50, height: 75, size: 'S'),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      book.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                        height: 1.3,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      book.author,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(
+                          book.genre.toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${book.pages} PAGES',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey.shade500,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-          ],
+              _ShelfMenu(book: book, status: status),
+            ],
+          ),
         ),
-        // Quick shelf menu button in the trailing position
-        trailing: _ShelfMenu(book: book),
       ),
     );
   }
 }
 
-/// Popup menu widget for quickly changing book's shelf status
-/// Shows checkmark icon if book is on a shelf, plus icon if not
 class _ShelfMenu extends StatelessWidget {
   final Book book;
+  final ShelfStatus? status;
 
-  const _ShelfMenu({required this.book});
+  const _ShelfMenu({required this.book, required this.status});
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
-    final status = state.statusFor(book);
-
     return PopupMenuButton<ShelfStatus?>(
       initialValue: status,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       onSelected: (value) {
         HapticFeedback.lightImpact();
         context.read<AppState>().setStatus(book, value);
@@ -80,7 +115,7 @@ class _ShelfMenu extends StatelessWidget {
           value: ShelfStatus.wantToRead,
           child: Row(
             children: const [
-              Icon(Icons.bookmark_border, size: 20),
+              Icon(Icons.bookmark_border, size: 18),
               SizedBox(width: 12),
               Text('Want to Read'),
             ],
@@ -90,7 +125,7 @@ class _ShelfMenu extends StatelessWidget {
           value: ShelfStatus.reading,
           child: Row(
             children: const [
-              Icon(Icons.menu_book, size: 20),
+              Icon(Icons.menu_book, size: 18),
               SizedBox(width: 12),
               Text('Reading'),
             ],
@@ -100,7 +135,7 @@ class _ShelfMenu extends StatelessWidget {
           value: ShelfStatus.finished,
           child: Row(
             children: const [
-              Icon(Icons.check_circle_outline, size: 20),
+              Icon(Icons.check_circle_outline, size: 18),
               SizedBox(width: 12),
               Text('Finished'),
             ],
@@ -113,18 +148,29 @@ class _ShelfMenu extends StatelessWidget {
             children: [
               Icon(
                 Icons.remove_circle_outline,
-                size: 20,
-                color: Colors.grey.shade700,
+                size: 18,
+                color: Colors.grey.shade600,
               ),
               const SizedBox(width: 12),
-              Text('Remove', style: TextStyle(color: Colors.grey.shade700)),
+              Text('Remove', style: TextStyle(color: Colors.grey.shade600)),
             ],
           ),
         ),
       ],
-      child: Icon(
-        status == null ? Icons.add : Icons.check,
-        color: status == null ? null : Colors.green,
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: status != null ? Colors.black : const Color(0xFFF5F5F5),
+          border: status != null
+              ? null
+              : Border.all(color: const Color(0xFFE0E0E0)),
+        ),
+        child: Icon(
+          status == null ? Icons.add : Icons.check,
+          size: 18,
+          color: status == null ? Colors.black : Colors.white,
+        ),
       ),
     );
   }

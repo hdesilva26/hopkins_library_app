@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
-/// Search bar widget with debouncing to avoid excessive search calls
-/// Includes clear button when text is entered
 class BookSearchBar extends StatefulWidget {
   final String hintText;
   final ValueChanged<String> onChanged;
@@ -45,8 +43,6 @@ class _BookSearchBarState extends State<BookSearchBar> {
     }
   }
 
-  // Debounce search input to avoid calling onChanged on every keystroke
-  // Waits 300ms after user stops typing before triggering search
   void _onSearchChanged(String value) {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 300), () {
@@ -56,38 +52,49 @@ class _BookSearchBarState extends State<BookSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: _controller,
-      onChanged: _onSearchChanged,
-      decoration: InputDecoration(
-        prefixIcon: const Icon(Icons.search),
-        suffixIcon: _hasText
-            ? IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  _controller.clear();
-                  widget.onChanged('');
-                },
-              )
-            : null,
-        hintText: widget.hintText,
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 12,
+    return SizedBox(
+      height: 48,
+      child: TextField(
+        controller: _controller,
+        onChanged: _onSearchChanged,
+        style: const TextStyle(fontSize: 14),
+        decoration: InputDecoration(
+          prefixIcon: const Icon(Icons.search, size: 20),
+          suffixIcon: _hasText
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 18),
+                  onPressed: () {
+                    _controller.clear();
+                    widget.onChanged('');
+                  },
+                )
+              : null,
+          hintText: widget.hintText,
+          hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+          filled: true,
+          fillColor: const Color(0xFFFAFAFA),
+          border: const OutlineInputBorder(
+            borderRadius: BorderRadius.zero,
+            borderSide: BorderSide(color: Color(0xFFE0E0E0)),
+          ),
+          enabledBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.zero,
+            borderSide: BorderSide(color: Color(0xFFE0E0E0)),
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.zero,
+            borderSide: BorderSide(color: Colors.black, width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
         ),
       ),
     );
   }
 }
 
-/// Horizontal scrolling genre filter chips
-/// Allows users to filter books by genre or view all books
 class GenreChips extends StatelessWidget {
   final List<String> genres;
   final String? selected;
@@ -106,46 +113,50 @@ class GenreChips extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          // "All" chip to clear genre filter
-          ChoiceChip(
-            label: const Text('All'),
-            selected: selected == null,
-            onSelected: (_) => onSelected(null),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            backgroundColor: Colors.white,
-            selectedColor: Colors.black,
-            labelStyle: TextStyle(
-              color: selected == null ? Colors.white : Colors.black,
-            ),
-          ),
+          _buildChip(context, 'ALL', selected == null, () => onSelected(null)),
           const SizedBox(width: 8),
-          // Genre chips for each available genre
           ...genres.map(
             (g) => Padding(
               padding: const EdgeInsets.only(right: 8),
-              child: ChoiceChip(
-                label: Text(g),
-                selected: selected == g,
-                onSelected: (_) => onSelected(g),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                backgroundColor: Colors.white,
-                selectedColor: Colors.black,
-                labelStyle: TextStyle(
-                  color: selected == g ? Colors.white : Colors.black,
-                ),
+              child: _buildChip(
+                context,
+                g.toUpperCase(),
+                selected == g,
+                () => onSelected(g),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildChip(
+    BuildContext context,
+    String label,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.black : Colors.white,
+          border: Border.all(
+            color: isSelected ? Colors.black : const Color(0xFFE0E0E0),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1,
+            color: isSelected ? Colors.white : Colors.black,
+          ),
+        ),
       ),
     );
   }
@@ -165,10 +176,13 @@ class SectionHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            title.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.5,
+              color: Colors.black,
+            ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -176,10 +190,10 @@ class SectionHeader extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               subtitle!,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.6),
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                letterSpacing: 0.3,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -200,11 +214,28 @@ class StatRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Expanded(child: Text(label)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Expanded(
+            child: Text(
+              label.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: Colors.black,
+            ),
+          ),
         ],
       ),
     );

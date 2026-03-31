@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/book.dart';
-import 'bookshelf_book.dart';
+import '../screens/book_detail/book_detail_page.dart';
+import 'book_cover_image.dart';
 
-/// Bookshelf widget displaying books in a horizontal scrolling row
-/// Mimics a physical bookshelf with books arranged side by side
 class BookshelfView extends StatelessWidget {
   final List<Book> books;
   final String shelfLabel;
@@ -17,28 +16,38 @@ class BookshelfView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (books.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(32.0),
+          padding: const EdgeInsets.all(32.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.book_outlined, size: 64, color: Colors.grey),
-              SizedBox(height: 16),
-              Text(
-                'No books on this shelf',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFE0E0E0), width: 2),
                 ),
-                textAlign: TextAlign.center,
+                child: Icon(
+                  Icons.book_outlined,
+                  size: 40,
+                  color: Colors.grey.shade400,
+                ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 20),
+              const Text(
+                'NO BOOKS ON THIS SHELF',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 8),
               Text(
                 'Add books to see them here',
-                style: TextStyle(fontSize: 14, color: Colors.black54),
-                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               ),
             ],
           ),
@@ -48,49 +57,77 @@ class BookshelfView extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
       children: [
-        // Shelf label
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Text(
-            shelfLabel,
+            shelfLabel.toUpperCase(),
             style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.5,
               color: Colors.black,
             ),
           ),
         ),
-        // Horizontal scrolling bookshelf
-        SizedBox(
-          height: 200,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
+        Expanded(
+          child: GridView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              childAspectRatio: 0.65,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 16,
+            ),
             itemCount: books.length,
             itemBuilder: (context, index) {
-              return BookshelfBook(book: books[index], width: 120, height: 180);
+              final book = books[index];
+              return _BookGridItem(book: book);
             },
           ),
         ),
-        // Bookshelf base (visual element)
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          height: 8,
-          decoration: BoxDecoration(
-            color: Colors.black,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
       ],
+    );
+  }
+}
+
+class _BookGridItem extends StatelessWidget {
+  final Book book;
+
+  const _BookGridItem({required this.book});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => BookDetailPage(book: book)));
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: BookCoverImage(
+              book: book,
+              width: double.infinity,
+              height: double.infinity,
+              size: 'M',
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            book.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              height: 1.2,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

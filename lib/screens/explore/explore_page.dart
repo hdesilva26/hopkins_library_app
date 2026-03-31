@@ -2,13 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/app_state.dart';
 import '../../models/book.dart';
-import '../../widgets/book_card.dart';
 import '../../widgets/book_list_tile.dart';
 import '../../widgets/common_widgets.dart';
 import '../required/required_books_page.dart';
 
-/// Explore page for discovering books
-/// Features: Search, genre filtering, trending books, top rated, and personalized recommendations
 class ExplorePage extends StatefulWidget {
   const ExplorePage({super.key});
 
@@ -20,41 +17,18 @@ class _ExplorePageState extends State<ExplorePage> {
   String _searchQuery = '';
   String? _selectedGenre;
 
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_scrollController.hasClients) return;
-
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 450),
-        curve: Curves.easeOutCubic,
-      );
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, state, _) {
-        // Start with all books, then apply filters
         List<Book> visibleBooks = state.allBooks;
 
-        // Filter by selected genre
         if (_selectedGenre != null && _selectedGenre!.isNotEmpty) {
           visibleBooks = visibleBooks
               .where((b) => b.genre == _selectedGenre)
               .toList();
         }
 
-        // Filter by search query (searches title and author)
         if (_searchQuery.isNotEmpty) {
           final q = _searchQuery.toLowerCase();
           visibleBooks = visibleBooks.where((b) {
@@ -63,19 +37,12 @@ class _ExplorePageState extends State<ExplorePage> {
           }).toList();
         }
 
-        // Get curated book lists for display
-        final trending = state.trendingBooks;
-        final topRated = state.topRatedBooks;
-        final recs = state.recommendations();
-
         return SafeArea(
           child: RefreshIndicator(
             onRefresh: () async {
-              // Simulate refresh delay
               await Future.delayed(const Duration(milliseconds: 500));
             },
             child: CustomScrollView(
-              controller: _scrollController,
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
@@ -96,41 +63,19 @@ class _ExplorePageState extends State<ExplorePage> {
                             final nextGenre = (genre == _selectedGenre)
                                 ? null
                                 : genre;
-
-                            setState(() {
-                              _selectedGenre = nextGenre;
-                            });
-
-                            // Only auto-scroll when selecting a genre (not when clearing)
-                            if (nextGenre != null && nextGenre.isNotEmpty) {
-                              _scrollToBottom();
-                            }
+                            setState(() => _selectedGenre = nextGenre);
                           },
                         ),
                         const SizedBox(height: 16),
-
-                        // Required Books Section
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(16),
-                          margin: const EdgeInsets.only(bottom: 16),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
-                                .withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withValues(alpha: 0.2),
-                            ),
-                          ),
+                          decoration: BoxDecoration(color: Colors.black),
                           child: Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.assignment_turned_in,
-                                color: Theme.of(context).colorScheme.primary,
+                                color: Colors.white,
                                 size: 20,
                               ),
                               const SizedBox(width: 12),
@@ -138,34 +83,28 @@ class _ExplorePageState extends State<ExplorePage> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      'Required Reading',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleSmall
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.primary,
-                                          ),
+                                    const Text(
+                                      'REQUIRED READING',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 1,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                     Text(
                                       '${state.allBooks.where((b) => b.isRequired).length} books required',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurface
-                                                .withValues(alpha: 0.7),
-                                          ),
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.white.withValues(
+                                          alpha: 0.7,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                              TextButton.icon(
+                              TextButton(
                                 onPressed: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
@@ -173,12 +112,19 @@ class _ExplorePageState extends State<ExplorePage> {
                                     ),
                                   );
                                 },
-                                icon: const Icon(Icons.arrow_forward, size: 16),
-                                label: const Text('View All'),
                                 style: TextButton.styleFrom(
+                                  foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 12,
                                     vertical: 8,
+                                  ),
+                                ),
+                                child: const Text(
+                                  'VIEW ALL',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 1,
                                   ),
                                 ),
                               ),
@@ -189,16 +135,40 @@ class _ExplorePageState extends State<ExplorePage> {
                     ),
                   ),
                 ),
-
-                // Search mode: show results list (no curated sections)
-                if (_searchQuery.isNotEmpty) ...[
-                  SliverToBoxAdapter(
-                    child: SectionHeader(
-                      title: 'Search Results',
-                      subtitle:
-                          '${visibleBooks.length} book${visibleBooks.length == 1 ? '' : 's'} found',
-                    ),
+                SliverToBoxAdapter(
+                  child: SectionHeader(
+                    title: _selectedGenre == null
+                        ? 'ALL BOOKS'
+                        : _selectedGenre!.toUpperCase(),
+                    subtitle: _searchQuery.isNotEmpty
+                        ? '${visibleBooks.length} result${visibleBooks.length == 1 ? '' : 's'}'
+                        : '${visibleBooks.length} book${visibleBooks.length == 1 ? '' : 's'}',
                   ),
+                ),
+                if (visibleBooks.isEmpty)
+                  SliverFillRemaining(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 48,
+                            color: Colors.grey.shade400,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No books found',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) =>
@@ -206,88 +176,6 @@ class _ExplorePageState extends State<ExplorePage> {
                       childCount: visibleBooks.length,
                     ),
                   ),
-                ],
-
-                // Not searching: show curated sections + browse all/browse by genre at the bottom
-                if (_searchQuery.isEmpty) ...[
-                  SliverToBoxAdapter(
-                    child: SectionHeader(
-                      title: 'Trending at Hopkins',
-                      subtitle: 'Popular right now',
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 275,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        itemCount: trending.length,
-                        itemBuilder: (context, index) {
-                          return BookCard(book: trending[index], large: true);
-                        },
-                      ),
-                    ),
-                  ),
-
-                  SliverToBoxAdapter(
-                    child: SectionHeader(
-                      title: 'Top Rated',
-                      subtitle: 'Highly rated books',
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 245,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        itemCount: topRated.length,
-                        itemBuilder: (context, index) {
-                          return BookCard(book: topRated[index]);
-                        },
-                      ),
-                    ),
-                  ),
-
-                  SliverToBoxAdapter(
-                    child: SectionHeader(
-                      title: 'Because You Finished…',
-                      subtitle: 'Recommendations just for you',
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 245,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        itemCount: recs.length,
-                        itemBuilder: (context, index) {
-                          return BookCard(book: recs[index]);
-                        },
-                      ),
-                    ),
-                  ),
-
-                  SliverToBoxAdapter(
-                    child: SectionHeader(
-                      title: _selectedGenre == null
-                          ? 'Browse All'
-                          : 'Browse: $_selectedGenre',
-                      subtitle: _selectedGenre == null
-                          ? null
-                          : 'Showing ${visibleBooks.length} book${visibleBooks.length == 1 ? '' : 's'}',
-                    ),
-                  ),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) =>
-                          BookListTile(book: visibleBooks[index]),
-                      childCount: visibleBooks.length,
-                    ),
-                  ),
-                ],
               ],
             ),
           ),

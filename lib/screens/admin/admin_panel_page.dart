@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../../services/auth_state.dart';
 import '../../services/user_service.dart';
 
-/// Admin panel for managing user roles
-/// Allows admins to change users between student / admin
 class AdminPanelPage extends StatelessWidget {
   const AdminPanelPage({super.key});
 
@@ -19,29 +16,27 @@ class AdminPanelPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthState>();
 
-    // Only admins can access this page
     if (!auth.isAdmin) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Admin Panel')),
-        body: const Center(
-          child: Text('Access Denied. Admin privileges required.'),
-        ),
+        appBar: AppBar(title: const Text('ADMIN PANEL')),
+        body: const Center(child: Text('Access Denied')),
       );
     }
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Admin Panel'),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(28),
-          child: Padding(
-            padding: EdgeInsets.only(left: 16, right: 16, bottom: 10),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text('Manage User Roles', style: TextStyle(fontSize: 13)),
-            ),
+        title: const Text(
+          'ADMIN PANEL',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 2,
           ),
         ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -70,67 +65,118 @@ class AdminPanelPage extends StatelessWidget {
               final userDoc = users[index];
               final userId = userDoc.id;
               final userData = userDoc.data() as Map<String, dynamic>;
-
               final isCurrentUser = userId == auth.user?.uid;
-
               final email =
-                  (userData['email'] as String?) ??
+                  userData['email'] as String? ??
                   (isCurrentUser ? (auth.user?.email ?? 'Unknown') : 'Unknown');
-
               final roleRaw = userData['role'] as String?;
               final currentRole = _roles.contains(roleRaw)
                   ? roleRaw!
-                  : UserService.roleStudent; // safe default
+                  : UserService.roleStudent;
 
-              return Card(
+              return Container(
                 margin: const EdgeInsets.only(bottom: 12),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: ListTile(
-                    title: Text(email),
-                    subtitle: Text('UID: $userId'),
-                    trailing: SizedBox(
-                      width: 170,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: const Color(0xFFE0E0E0)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        border: Border.all(color: Colors.black, width: 2),
+                      ),
+                      child: Center(
+                        child: Text(
+                          (email.isNotEmpty ? email[0].toUpperCase() : '?'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
                       child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (isCurrentUser)
-                            Chip(
-                              label: const Text('You'),
-                              backgroundColor: Colors.blue.shade100,
-                            )
-                          else
-                            DropdownButtonFormField<String>(
-                              initialValue: currentRole,
-                              isDense: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Role',
-                                border: OutlineInputBorder(),
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 10,
-                                ),
-                              ),
-                              items: _roles
-                                  .map(
-                                    (r) => DropdownMenuItem<String>(
-                                      value: r,
-                                      child: Text(_prettyRole(r)),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (newRole) async {
-                                if (newRole == null || newRole == currentRole) {
-                                  return;
-                                }
-                                await _changeUserRole(context, userId, newRole);
-                              },
+                          Text(
+                            email,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'UID: ${userId.substring(0, 8)}...',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                  ),
+                    if (isCurrentUser)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF5F5F5),
+                          border: Border.all(color: const Color(0xFFE0E0E0)),
+                        ),
+                        child: const Text(
+                          'YOU',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: currentRole,
+                            isDense: true,
+                            icon: const Icon(Icons.arrow_drop_down, size: 18),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                            items: _roles
+                                .map(
+                                  (r) => DropdownMenuItem<String>(
+                                    value: r,
+                                    child: Text(_prettyRole(r).toUpperCase()),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (newRole) async {
+                              if (newRole != null && newRole != currentRole) {
+                                await _changeUserRole(context, userId, newRole);
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               );
             },
@@ -156,18 +202,16 @@ class AdminPanelPage extends StatelessWidget {
     String newRole,
   ) async {
     final userService = UserService();
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-
     try {
       await userService.setUserRole(userId, newRole);
-      scaffoldMessenger.showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('User role changed to ${_prettyRole(newRole)}'),
-          backgroundColor: Colors.green,
+          backgroundColor: Colors.black,
         ),
       );
     } catch (e) {
-      scaffoldMessenger.showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to change role: $e'),
           backgroundColor: Colors.red,

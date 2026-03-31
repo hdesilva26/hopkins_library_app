@@ -41,9 +41,7 @@ class _AddBookPageState extends State<AddBookPage> {
       if (!mounted) return;
       setState(() => _searchError = e.toString());
     } finally {
-      if (mounted) {
-        setState(() => _searching = false);
-      }
+      if (mounted) setState(() => _searching = false);
     }
   }
 
@@ -56,57 +54,115 @@ class _AddBookPageState extends State<AddBookPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Book')),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text(
+          'ADD BOOK',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 2,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          TextField(
-            controller: _searchController,
-            textInputAction: TextInputAction.search,
-            onSubmitted: (_) => _runSearch(),
-            decoration: InputDecoration(
-              labelText: 'Search books',
-              hintText: 'Try: "The Hobbit" or "9780547928227"',
-              border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                tooltip: 'Search',
-                onPressed: _searching ? null : _runSearch,
-                icon: _searching
-                    ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.search),
+          SizedBox(
+            height: 48,
+            child: TextField(
+              controller: _searchController,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (_) => _runSearch(),
+              style: const TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                hintText: 'Try: "The Hobbit" or "9780547928227"',
+                hintStyle: TextStyle(color: Colors.grey.shade500),
+                prefixIcon: const Icon(Icons.search, size: 20),
+                suffixIcon: IconButton(
+                  onPressed: _searching ? null : _runSearch,
+                  icon: _searching
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.arrow_forward, size: 20),
+                ),
+                filled: true,
+                fillColor: const Color(0xFFFAFAFA),
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.zero,
+                  borderSide: BorderSide(color: Color(0xFFE0E0E0)),
+                ),
+                enabledBorder: const OutlineInputBorder(
+                  borderRadius: BorderRadius.zero,
+                  borderSide: BorderSide(color: Color(0xFFE0E0E0)),
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderRadius: BorderRadius.zero,
+                  borderSide: BorderSide(color: Colors.black, width: 2),
+                ),
               ),
             ),
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              TextButton.icon(
-                onPressed: () => _openManualAdd(),
-                icon: const Icon(Icons.edit),
-                label: const Text("Can't find it? Add manually"),
-              ),
-            ],
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 44,
+            child: OutlinedButton.icon(
+              onPressed: () => _openManualAdd(),
+              icon: const Icon(Icons.edit, size: 18),
+              label: const Text("CAN'T FIND IT? ADD MANUALLY"),
+            ),
           ),
           if (_searchError != null) ...[
-            const SizedBox(height: 8),
-            Text(_searchError!, style: TextStyle(color: Colors.red.shade700)),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(border: Border.all(color: Colors.red)),
+              child: Text(
+                _searchError!,
+                style: const TextStyle(color: Colors.red, fontSize: 13),
+              ),
+            ),
           ],
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           if (_results.isEmpty && !_searching)
-            Text(
-              'Search results will appear here.',
-              style: TextStyle(color: Colors.grey.shade700),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Search results will appear here.',
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+              ),
             ),
           for (final r in _results)
-            Card(
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFFE0E0E0)),
+              ),
               child: ListTile(
-                title: Text(r.title),
-                subtitle: Text(r.subtitleParts),
-                trailing: const Icon(Icons.add),
+                title: Text(
+                  r.title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+                subtitle: Text(
+                  r.subtitleParts,
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                ),
+                trailing: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: const BoxDecoration(color: Colors.black),
+                  child: const Icon(Icons.add, color: Colors.white, size: 18),
+                ),
                 onTap: () => _openManualAdd(prefill: r),
               ),
             ),
@@ -132,7 +188,6 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
   final _pagesController = TextEditingController();
   final _isbnController = TextEditingController();
 
-  bool _isRequired = false;
   bool _isLoading = false;
 
   @override
@@ -169,7 +224,7 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
         author: _authorController.text.trim(),
         genre: _genreController.text.trim(),
         pages: int.parse(_pagesController.text),
-        isRequired: _isRequired,
+        isRequired: false,
         isbn: _isbnController.text.trim().isEmpty
             ? null
             : _isbnController.text.trim(),
@@ -180,7 +235,7 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Book added successfully!'),
-          backgroundColor: Colors.green,
+          backgroundColor: Colors.black,
         ),
       );
       Navigator.of(context).pop();
@@ -193,19 +248,26 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
         ),
       );
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          widget.prefill == null ? 'Add Book Manually' : 'Confirm & Add',
+          widget.prefill == null ? 'ADD MANUALLY' : 'CONFIRM & ADD',
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 2,
+          ),
         ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
       ),
       body: Form(
         key: _formKey,
@@ -214,10 +276,7 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
           children: [
             TextFormField(
               controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title *',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'Title *'),
               validator: (value) => (value == null || value.trim().isEmpty)
                   ? 'Please enter a title'
                   : null,
@@ -225,10 +284,7 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _authorController,
-              decoration: const InputDecoration(
-                labelText: 'Author *',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'Author *'),
               validator: (value) => (value == null || value.trim().isEmpty)
                   ? 'Please enter an author'
                   : null,
@@ -236,10 +292,7 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _genreController,
-              decoration: const InputDecoration(
-                labelText: 'Genre *',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'Genre *'),
               validator: (value) => (value == null || value.trim().isEmpty)
                   ? 'Please enter a genre'
                   : null,
@@ -247,10 +300,7 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _pagesController,
-              decoration: const InputDecoration(
-                labelText: 'Pages *',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'Pages *'),
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) return 'Required';
@@ -262,32 +312,25 @@ class _AddBookManualPageState extends State<AddBookManualPage> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _isbnController,
-              decoration: const InputDecoration(
-                labelText: 'ISBN (Optional)',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'ISBN (Optional)'),
               keyboardType: TextInputType.number,
             ),
-            const SizedBox(height: 16),
-            CheckboxListTile(
-              title: const Text('Required Reading'),
-              value: _isRequired,
-              onChanged: (value) =>
-                  setState(() => _isRequired = value ?? false),
-            ),
             const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _submitForm,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+            SizedBox(
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _submitForm,
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('ADD TO LIBRARY'),
               ),
-              child: _isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Add to Library'),
             ),
           ],
         ),

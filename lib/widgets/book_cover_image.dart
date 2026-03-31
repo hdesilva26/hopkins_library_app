@@ -9,7 +9,7 @@ class BookCoverImage extends StatelessWidget {
   final double? width;
   final double? height;
   final BoxFit fit;
-  final String size;  // Image size: 'S' (small), 'M' (medium), or 'L' (large)
+  final String size; // Image size: 'S' (small), 'M' (medium), or 'L' (large)
 
   const BookCoverImage({
     super.key,
@@ -31,36 +31,33 @@ class BookCoverImage extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.zero,
         color: Colors.grey.shade200,
-        border: Border.all(color: Colors.black, width: 1),
       ),
-      // Show cached network image if URL is available, otherwise show placeholder
       child: coverUrl != null
           ? CachedNetworkImage(
-                imageUrl: coverUrl,
-                width: width,
-                height: height,
-                fit: fit,
-                // Show loading indicator while image loads
-                placeholder: (context, url) => Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.zero,
-                    color: Colors.grey.shade200,
-                  ),
-                  child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black54),
+              imageUrl: coverUrl,
+              width: width,
+              height: height,
+              fit: fit,
+              placeholder: (context, url) => Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.zero,
+                  color: Colors.grey.shade200,
+                ),
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.black54,
                   ),
                 ),
-                // Show placeholder if image fails to load
-                errorWidget: (context, url, error) => _buildPlaceholder(),
-                fadeInDuration: const Duration(milliseconds: 300),
-                fadeOutDuration: const Duration(milliseconds: 100),
-              )
+              ),
+              errorWidget: (context, url, error) => _buildPlaceholder(),
+              fadeInDuration: const Duration(milliseconds: 300),
+              fadeOutDuration: const Duration(milliseconds: 100),
+            )
           : _buildPlaceholder(),
     );
   }
 
-  /// Build placeholder widget showing first letter of book title
-  /// Used when cover image is unavailable or fails to load
   Widget _buildPlaceholder() {
     return Container(
       width: width,
@@ -68,7 +65,6 @@ class BookCoverImage extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.zero,
         color: Colors.grey.shade200,
-        border: Border.all(color: Colors.black, width: 1),
       ),
       child: Center(
         child: Text(
@@ -83,4 +79,3 @@ class BookCoverImage extends StatelessWidget {
     );
   }
 }
-

@@ -3,12 +3,10 @@ import 'package:provider/provider.dart';
 import '../explore/explore_page.dart';
 import '../my_books/my_books_page.dart';
 import '../required/required_books_page.dart';
-import '../groups/groups_page.dart';
 import '../profile/profile_page.dart';
 import '../admin/add_book_page.dart';
 import '../../services/auth_state.dart';
 
-/// Main navigation screen with bottom navigation bar
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -23,73 +21,54 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Consumer<AuthState>(
       builder: (context, auth, _) {
-        // Build pages and destinations dynamically based on user role
         final pages = <Widget>[
           const ExplorePage(),
           const MyBooksPage(),
           const RequiredBooksPage(),
-          const GroupsPage(),
           const ProfilePage(),
         ];
 
-        final destinations = <NavigationDestination>[
-          const NavigationDestination(
-            icon: Icon(Icons.explore_outlined),
-            selectedIcon: Icon(Icons.explore),
-            label: 'Explore',
+        final destinations = <_NavItem>[
+          _NavItem(
+            icon: Icons.explore_outlined,
+            selectedIcon: Icons.explore,
+            label: 'EXPLORE',
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.menu_book_outlined),
-            selectedIcon: Icon(Icons.menu_book),
-            label: 'My Books',
+          _NavItem(
+            icon: Icons.menu_book_outlined,
+            selectedIcon: Icons.menu_book,
+            label: 'MY BOOKS',
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.school_outlined),
-            selectedIcon: Icon(Icons.school),
-            label: 'Required',
+          _NavItem(
+            icon: Icons.school_outlined,
+            selectedIcon: Icons.school,
+            label: 'REQUIRED',
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.group_outlined),
-            selectedIcon: Icon(Icons.group),
-            label: 'Groups',
-          ),
-          const NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
+          _NavItem(
+            icon: Icons.person_outline,
+            selectedIcon: Icons.person,
+            label: 'PROFILE',
           ),
         ];
 
-        final titles = <String>[
-          'Explore',
-          'My Books',
-          'Required',
-          'Groups',
-          'Profile',
-        ];
+        final titles = <String>['Explore', 'My Books', 'Required', 'Profile'];
 
         return Scaffold(
-          appBar: AppBar(title: Text(titles[_selectedIndex])),
-          // IndexedStack preserves state when switching tabs
-          body: IndexedStack(index: _selectedIndex, children: pages),
-          // Bottom navigation bar with dynamic destinations
-          bottomNavigationBar: NavigationBar(
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: (index) {
-              setState(() => _selectedIndex = index);
-            },
-            elevation: 4,
-            height: 70,
-            destinations: destinations,
-          ),
-          // Floating action button to add books (only shown on Explore tab for admins)
-          floatingActionButton: _selectedIndex == 0
-              ? Consumer<AuthState>(
+          appBar: AppBar(
+            title: Text(
+              titles[_selectedIndex].toUpperCase(),
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                letterSpacing: 2,
+                fontSize: 16,
+              ),
+            ),
+            actions: [
+              if (_selectedIndex == 0)
+                Consumer<AuthState>(
                   builder: (context, auth, _) {
-                    // Only show Add Book button for admins
                     if (!auth.isAdmin) return const SizedBox.shrink();
-
-                    return FloatingActionButton.extended(
+                    return IconButton(
                       onPressed: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -98,13 +77,56 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                       icon: const Icon(Icons.add),
-                      label: const Text('Add Book'),
+                      tooltip: 'Add Book',
                     );
                   },
+                ),
+            ],
+          ),
+          body: IndexedStack(index: _selectedIndex, children: pages),
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: (index) => setState(() => _selectedIndex = index),
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.white,
+            selectedItemColor: Colors.black,
+            unselectedItemColor: Colors.grey.shade500,
+            selectedLabelStyle: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+            elevation: 0,
+            showSelectedLabels: true,
+            showUnselectedLabels: true,
+            items: destinations
+                .map(
+                  (item) => BottomNavigationBarItem(
+                    icon: Icon(item.icon),
+                    activeIcon: Icon(item.selectedIcon),
+                    label: item.label,
+                  ),
                 )
-              : null,
+                .toList(),
+          ),
         );
       },
     );
   }
+}
+
+class _NavItem {
+  final IconData icon;
+  final IconData selectedIcon;
+  final String label;
+
+  const _NavItem({
+    required this.icon,
+    required this.selectedIcon,
+    required this.label,
+  });
 }

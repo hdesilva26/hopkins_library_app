@@ -4,11 +4,6 @@ import '../../services/auth_state.dart';
 import '../auth/sign_in_screen.dart';
 import '../home/home_screen.dart';
 
-/// Authentication routing widget
-/// Determines which screen to show based on authentication status:
-/// - Loading: Shows spinner while checking auth state
-/// - Not signed in: Shows sign-in screen
-/// - Signed in: Shows main home screen
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
@@ -16,22 +11,47 @@ class AuthGate extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AuthState>(
       builder: (context, auth, _) {
-        // Show loading indicator while checking authentication state
         if (auth.initializing) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 3),
+                    ),
+                    child: const Icon(
+                      Icons.menu_book_rounded,
+                      size: 30,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'HOPKINS READS',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 3,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           );
         }
 
-        // Route to sign-in screen if user is not authenticated
         if (!auth.isSignedIn) {
           return const SignInScreen();
         }
 
-        // Route to main app if user is authenticated
         return const HomeScreen();
       },
     );
   }
 }
-

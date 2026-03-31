@@ -29,11 +29,18 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
-              title: const Text('Required Books'),
+              title: const Text(
+                'REQUIRED BOOKS',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 2,
+                ),
+              ),
               floating: true,
               snap: true,
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              foregroundColor: Theme.of(context).colorScheme.onSurface,
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
               elevation: 0,
             ),
             SliverToBoxAdapter(
@@ -45,74 +52,75 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Theme.of(
-                              context,
-                            ).colorScheme.primary.withValues(alpha: 0.1),
-                            Theme.of(
-                              context,
-                            ).colorScheme.secondary.withValues(alpha: 0.1),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.outline.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      decoration: BoxDecoration(color: Colors.black),
+                      child: Row(
                         children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.school,
-                                color: Theme.of(context).colorScheme.primary,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Required by Class',
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                    ),
-                              ),
-                            ],
+                          const Icon(
+                            Icons.school,
+                            color: Colors.white,
+                            size: 20,
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Browse required books for your classes',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: 0.8),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'REQUIRED BY CLASS',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 1,
+                                    color: Colors.white,
+                                  ),
                                 ),
+                                Text(
+                                  'Browse required books for your classes',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.white.withValues(alpha: 0.7),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 16),
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search classes...',
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    SizedBox(
+                      height: 48,
+                      child: TextField(
+                        onChanged: (value) =>
+                            setState(() => _searchQuery = value),
+                        style: const TextStyle(fontSize: 14),
+                        decoration: InputDecoration(
+                          hintText: 'Search classes...',
+                          hintStyle: TextStyle(color: Colors.grey.shade500),
+                          prefixIcon: const Icon(Icons.search, size: 20),
+                          filled: true,
+                          fillColor: const Color(0xFFFAFAFA),
+                          border: const OutlineInputBorder(
+                            borderRadius: BorderRadius.zero,
+                            borderSide: BorderSide(color: Color(0xFFE0E0E0)),
+                          ),
+                          enabledBorder: const OutlineInputBorder(
+                            borderRadius: BorderRadius.zero,
+                            borderSide: BorderSide(color: Color(0xFFE0E0E0)),
+                          ),
+                          focusedBorder: const OutlineInputBorder(
+                            borderRadius: BorderRadius.zero,
+                            borderSide: BorderSide(
+                              color: Colors.black,
+                              width: 2,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                         ),
-                        filled: true,
                       ),
-                      onChanged: (value) {
-                        setState(() => _searchQuery = value);
-                      },
                     ),
                     const SizedBox(height: 12),
                   ],
@@ -159,20 +167,17 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
                           Icon(
                             Icons.class_outlined,
                             size: 64,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.3),
+                            color: Colors.grey.shade300,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             _searchQuery.isNotEmpty
                                 ? 'No classes match your search'
                                 : 'No classes available',
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: 0.6),
-                                ),
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey.shade600,
+                            ),
                           ),
                         ],
                       ),
@@ -189,11 +194,9 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
                       isAdmin: auth.isAdmin,
                       onTap: () {
                         setState(() {
-                          if (_selectedClass?.id == classModel.id) {
-                            _selectedClass = null;
-                          } else {
-                            _selectedClass = classModel;
-                          }
+                          _selectedClass = _selectedClass?.id == classModel.id
+                              ? null
+                              : classModel;
                         });
                       },
                       onAddBook: () => _showAddBookDialog(context, classModel),
@@ -208,6 +211,8 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
       floatingActionButton: context.watch<AuthState>().isAdmin
           ? FloatingActionButton(
               onPressed: () => _showCreateClassDialog(context),
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
               child: const Icon(Icons.add),
             )
           : null,
@@ -221,7 +226,10 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Create Class'),
+        title: const Text(
+          'CREATE CLASS',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -245,7 +253,7 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('CANCEL'),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -260,7 +268,7 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
                 if (context.mounted) Navigator.pop(context);
               }
             },
-            child: const Text('Create'),
+            child: const Text('CREATE'),
           ),
         ],
       ),
@@ -272,7 +280,6 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
     ClassModel classModel,
   ) async {
     final books = await _bookService.getAllBooksOnce();
-
     if (!context.mounted) return;
     if (books.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -292,7 +299,10 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text('Add Book to ${classModel.name}'),
+          title: Text(
+            'ADD BOOK TO ${classModel.name.toUpperCase()}',
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+          ),
           content: SizedBox(
             width: double.maxFinite,
             child: availableBooks.isEmpty
@@ -305,14 +315,18 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
                       final isSelected = selectedBook?.id == book.id;
                       return ListTile(
                         leading: isSelected
-                            ? const Icon(Icons.check_circle)
+                            ? const Icon(
+                                Icons.check_circle,
+                                color: Colors.black,
+                              )
                             : const Icon(Icons.book),
-                        title: Text(book.title),
+                        title: Text(
+                          book.title,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
                         subtitle: Text(book.author),
                         selected: isSelected,
-                        onTap: () {
-                          setDialogState(() => selectedBook = book);
-                        },
+                        onTap: () => setDialogState(() => selectedBook = book),
                       );
                     },
                   ),
@@ -320,7 +334,7 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
+              child: const Text('CANCEL'),
             ),
             ElevatedButton(
               onPressed: selectedBook == null
@@ -332,7 +346,7 @@ class _RequiredBooksPageState extends State<RequiredBooksPage> {
                       );
                       if (dialogContext.mounted) Navigator.pop(dialogContext);
                     },
-              child: const Text('Add'),
+              child: const Text('ADD'),
             ),
           ],
         ),
@@ -358,70 +372,111 @@ class _ClassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+      ),
       child: Column(
         children: [
-          ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              child: Icon(
-                Icons.class_,
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-              ),
-            ),
-            title: Text(
-              classModel.name,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: classModel.subject != null
-                ? Text(classModel.subject!)
-                : null,
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '${classModel.requiredBooks.length} books',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+          InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      border: Border.all(color: Colors.black, width: 2),
+                    ),
+                    child: const Icon(
+                      Icons.class_,
+                      color: Colors.white,
+                      size: 20,
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
-              ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          classModel.name,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        if (classModel.subject != null)
+                          Text(
+                            classModel.subject!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(color: Colors.black),
+                    child: Text(
+                      '${classModel.requiredBooks.length} BOOKS',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    isExpanded ? Icons.expand_less : Icons.expand_more,
+                    color: Colors.black54,
+                  ),
+                ],
+              ),
             ),
-            onTap: onTap,
           ),
           if (isExpanded) ...[
-            const Divider(height: 1),
+            Container(height: 1, color: const Color(0xFFE0E0E0)),
             if (classModel.requiredBooks.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(16),
-                child: Text('No required books for this class'),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'No required books for this class',
+                  style: TextStyle(color: Colors.grey.shade600),
+                ),
               )
             else
               ...classModel.requiredBooks.map(
                 (book) => BookListTile(book: book),
               ),
             if (isAdmin) ...[
-              const Divider(height: 1),
+              Container(height: 1, color: const Color(0xFFE0E0E0)),
               Padding(
                 padding: const EdgeInsets.all(12),
-                child: OutlinedButton.icon(
-                  onPressed: onAddBook,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Book to Class'),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 40,
+                  child: OutlinedButton.icon(
+                    onPressed: onAddBook,
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('ADD BOOK TO CLASS'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                  ),
                 ),
               ),
             ],

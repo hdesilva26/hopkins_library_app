@@ -4,8 +4,6 @@ import '../../models/app_state.dart';
 import '../../models/book.dart';
 import '../../widgets/bookshelf_view.dart';
 
-/// My Books page - displays user's reading shelves
-/// Three tabs: Want to Read, Reading, and Finished
 class MyBooksPage extends StatelessWidget {
   const MyBooksPage({super.key});
 
@@ -16,16 +14,17 @@ class MyBooksPage extends StatelessWidget {
         return DefaultTabController(
           length: 3,
           child: Column(
-            children: const [
-              // Tab bar for switching between shelf types
-              TabBar(
-                tabs: [
-                  Tab(text: 'Want to Read'),
-                  Tab(text: 'Reading'),
-                  Tab(text: 'Finished'),
-                ],
+            children: [
+              Container(
+                color: Colors.white,
+                child: const TabBar(
+                  tabs: [
+                    Tab(text: 'WANT TO READ'),
+                    Tab(text: 'READING'),
+                    Tab(text: 'FINISHED'),
+                  ],
+                ),
               ),
-              // Tab views showing bookshelf for each shelf type
               Expanded(
                 child: TabBarView(
                   children: [
@@ -43,8 +42,6 @@ class MyBooksPage extends StatelessWidget {
   }
 }
 
-/// Container widget for displaying a specific shelf's books as a bookshelf
-/// Shows bookshelf view with horizontal scrolling book covers
 class _BookshelfContainer extends StatelessWidget {
   final ShelfStatus type;
 
@@ -65,7 +62,6 @@ class _BookshelfContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
 
-    // Get books for the specific shelf type
     List<Book> books;
     switch (type) {
       case ShelfStatus.wantToRead:
@@ -79,8 +75,6 @@ class _BookshelfContainer extends StatelessWidget {
         break;
     }
 
-    // Show bookshelf view without extra vertical scrolling wrapper to avoid
-    // scrolling conflicts on some devices.
     return RefreshIndicator(
       onRefresh: () async {
         await Future.delayed(const Duration(milliseconds: 500));

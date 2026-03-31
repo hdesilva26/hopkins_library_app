@@ -3,11 +3,9 @@ import '../models/book.dart';
 import '../screens/book_detail/book_detail_page.dart';
 import 'book_cover_image.dart';
 
-/// Book card widget for displaying books in horizontal lists
-/// Features: Press animation, Hero animation for navigation, book metadata display
 class BookCard extends StatefulWidget {
   final Book book;
-  final bool large; // Use larger size for featured sections
+  final bool large;
 
   const BookCard({super.key, required this.book, this.large = false});
 
@@ -23,14 +21,13 @@ class _BookCardState extends State<BookCard>
   @override
   void initState() {
     super.initState();
-    // Set up press animation for tactile feedback
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 150),
+      duration: const Duration(milliseconds: 100),
     );
     _scaleAnimation = Tween<double>(
       begin: 1.0,
-      end: 0.95,
+      end: 0.96,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
@@ -42,42 +39,29 @@ class _BookCardState extends State<BookCard>
 
   @override
   Widget build(BuildContext context) {
-    // Make the large cards big enough to clearly showcase the full cover
-    // while keeping small cards compact in other sections.
-    final width = widget.large ? 140.0 : 120.0;
-    // Use book cover aspect ratio (approximately 1.5:1 height to width)
-    final coverHeight = widget.large ? 210.0 : 180.0;
-    final totalHeight =
-        coverHeight +
-        65; // Optimized space for title and metadata to prevent overflow
+    final width = widget.large ? 130.0 : 110.0;
+    final coverHeight = widget.large ? 195.0 : 165.0;
+    final totalHeight = coverHeight + 55;
 
     return GestureDetector(
-      // Handle press animations for better user feedback
-      onTapDown: (_) {
-        _controller.forward();
-      },
+      onTapDown: (_) => _controller.forward(),
       onTapUp: (_) {
         _controller.reverse();
-        // Navigate to book detail page on tap
         Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => BookDetailPage(book: widget.book)),
         );
       },
-      onTapCancel: () {
-        _controller.reverse();
-      },
-      // Give the card proper book cover proportions with flexible height
+      onTapCancel: () => _controller.reverse(),
       child: SizedBox(
         height: totalHeight,
         child: ScaleTransition(
           scale: _scaleAnimation,
           child: Container(
             width: width,
-            margin: const EdgeInsets.symmetric(horizontal: 8),
+            margin: const EdgeInsets.symmetric(horizontal: 6),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Hero animation for smooth cover image transition to detail page
                 Hero(
                   tag: 'book_cover_${widget.book.id}',
                   child: Material(
@@ -90,15 +74,16 @@ class _BookCardState extends State<BookCard>
                     ),
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   widget.book.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    height: 1.1,
+                    height: 1.2,
+                    color: Colors.black,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -106,7 +91,7 @@ class _BookCardState extends State<BookCard>
                   widget.book.author,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 9, color: Colors.grey.shade700),
+                  style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
                 ),
               ],
             ),
