@@ -55,10 +55,10 @@
               "client_type": 3
             },
             {
-              "client_id": "627822257528-jn3lc7pjd4o6oonlc2aboigmojg2tla4.apps.googleusercontent.com",
+              "client_id": "627822257528-3chq9kecv3hh6n9evkcirs3knc6c5rs5.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.libraryApp"
+                "bundle_id": "evil.tech.hopreads"
               }
             }
           ]

@@ -17,19 +17,13 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         return macos;
       case TargetPlatform.windows:
@@ -48,11 +42,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyBrBjmLxb2f1pbJPaUIOSsbYJGWJiSdikw',
-    appId: '1:627822257528:ios:4a11e0e514f4b12244548d',
+    appId: '1:627822257528:ios:e3aab1a055d6553844548d',
     messagingSenderId: '627822257528',
     projectId: 'hopkins-summer-reading',
     storageBucket: 'hopkins-summer-reading.firebasestorage.app',
-    iosBundleId: 'com.example.libraryApp',
+    androidClientId: '627822257528-5rl723c740l41dto4bp3vl34dgds84o6.apps.googleusercontent.com',
+    iosClientId: '627822257528-2s713vegpk2aqsdnngusr374r6cra1nf.apps.googleusercontent.com',
+    iosBundleId: 'com.example.flutterapps',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
@@ -71,6 +67,27 @@ class DefaultFirebaseOptions {
     messagingSenderId: '627822257528',
     projectId: 'hopkins-summer-reading',
     storageBucket: 'hopkins-summer-reading.firebasestorage.app',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyCNTPmju8wWMiqiync5IX8p3ra3jOPbtFs',
+    appId: '1:627822257528:web:0768cb0a54c6512b44548d',
+    messagingSenderId: '627822257528',
+    projectId: 'hopkins-summer-reading',
+    authDomain: 'hopkins-summer-reading.firebaseapp.com',
+    storageBucket: 'hopkins-summer-reading.firebasestorage.app',
+    measurementId: 'G-FRL2S3SCGZ',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyBrBjmLxb2f1pbJPaUIOSsbYJGWJiSdikw',
+    appId: '1:627822257528:ios:e3aab1a055d6553844548d',
+    messagingSenderId: '627822257528',
+    projectId: 'hopkins-summer-reading',
+    storageBucket: 'hopkins-summer-reading.firebasestorage.app',
+    androidClientId: '627822257528-5rl723c740l41dto4bp3vl34dgds84o6.apps.googleusercontent.com',
+    iosClientId: '627822257528-2s713vegpk2aqsdnngusr374r6cra1nf.apps.googleusercontent.com',
+    iosBundleId: 'com.example.flutterapps',
   );
 
 }
